@@ -1,0 +1,23 @@
+@font-face { font-family: 'Hercas Montserrat'; src: url('/fonts/montserrat-variable.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+.auth-shell { display:grid; grid-template-columns:1fr 1fr; max-width:1120px; margin:140px auto 64px; min-height:620px; border:1px solid #e0e4ed; border-radius:20px; overflow:hidden; background:#fff; box-shadow:0 20px 60px #0000360c; font-family:'Hercas Montserrat',sans-serif; }
+.auth-story { padding:64px 48px; background:radial-gradient(ellipse at bottom right,#252578,transparent 70%),#000036; color:white; display:flex; flex-direction:column; }
+.auth-eyebrow { font-size:11px; letter-spacing:.15em; font-weight:700; }
+.auth-story .auth-eyebrow { color:#fad318; }
+.auth-story h1 { font-size:clamp(36px,4vw,54px); font-weight:750; line-height:1.1; margin:56px 0 24px; }
+.auth-story p { color:#c4c5dc; line-height:1.8; max-width:350px; }
+.auth-story-foot { margin-top:auto; padding-top:70px; line-height:1.6; color:#c4c5dc; }
+.auth-story-foot strong { color:#fad318; }
+.auth-card { padding:64px 48px; color:#000036; }
+.auth-card h2 { font-size:27px; font-weight:750; margin:16px 0; }
+.auth-card p { line-height:1.6; color:#526079; font-size:14px; }
+.auth-card form { margin-top:30px; }
+.auth-card label { display:block; font-size:13px; font-weight:600; margin:20px 0; }
+.auth-card input { display:block; width:100%; margin-top:8px; padding:12px; border:1px solid #bac3d0; border-radius:8px; background:white; color:#000036; }
+.auth-card input:focus-visible { outline:3px solid #e1bb28; outline-offset:2px; }
+.auth-button { display:block; width:100%; padding:14px 20px; background:#fad318; color:#000036; font-weight:700; border:0; border-radius:8px; text-align:center; margin-top:24px; cursor:pointer; }
+.auth-button:disabled { opacity:.6; cursor:wait; }
+.auth-links { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:24px; font-size:12px; text-decoration:underline; }
+.auth-links a { color:#010173; }
+.auth-notice { padding:16px; border-radius:8px; background:#eef1f6; margin:20px 0; line-height:1.6; font-size:14px; }
+.auth-caption { margin-top:32px; font-size:12px!important; }
+@media(max-width:760px) { .auth-shell { grid-template-columns:1fr; margin:100px 16px 32px; } .auth-story { padding:32px; } .auth-story h1 { margin-top:24px; } .auth-story-foot { display:none; } .auth-card { padding:32px 24px; } }

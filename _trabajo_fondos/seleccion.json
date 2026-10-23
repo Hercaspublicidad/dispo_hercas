@@ -1,0 +1,74 @@
+{
+  "Barranquilla": {
+    "codigo": "MV-BAQ-002",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\METRO VIAS\\Barranquilla\\MV-BAQ-002\\MV-BAQ-002_foto_HERCAS.png"
+  },
+  "Bogotá": {
+    "codigo": "ICO-BOG-020",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\ICO MEDIOS\\Bogotá\\ICO-BOG-020\\ICO-BOG-020_foto_HERCAS.png"
+  },
+  "Yumbo": {
+    "codigo": "MV-YUM-001",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\METRO VIAS\\Yumbo\\MV-YUM-001\\MV-YUM-001_foto_HERCAS.png"
+  },
+  "Buenaventura": {
+    "codigo": "MV-BUN-001",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\METRO VIAS\\Buenaventura\\MV-BUN-001\\MV-BUN-001_foto_HERCAS.png"
+  },
+  "Cali": {
+    "codigo": "MV-CLO-021",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\METRO VIAS\\Cali\\MV-CLO-021\\MV-CLO-021_foto_HERCAS.png"
+  },
+  "Cartagena": {
+    "codigo": "OPE-CTG-006",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\OPE\\Cartagena\\OPE-CTG-006\\OPE-CTG-006_foto_HERCAS.png"
+  },
+  "Medellín": {
+    "codigo": "FDL-MDE-022",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Medellín\\FDL-MDE-022\\FDL-MDE-022_foto_HERCAS.png"
+  },
+  "Envigado": {
+    "codigo": "FDL-ENV-002",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Envigado\\FDL-ENV-002\\FDL-ENV-002_foto_HERCAS.png"
+  },
+  "Sabaneta": {
+    "codigo": "FDL-SAB-001",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Sabaneta\\FDL-SAB-001\\FDL-SAB-001_foto_HERCAS.png"
+  },
+  "Itagüí": {
+    "codigo": "FDL-ITG-002",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Itagüí\\FDL-ITG-002\\FDL-ITG-002_foto_HERCAS.png"
+  },
+  "La Estrella": {
+    "codigo": "FDL-LES-002",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\La Estrella\\FDL-LES-002\\FDL-LES-002_foto_HERCAS.png"
+  },
+  "Caldas": {
+    "codigo": "FDL-CLD-001",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Caldas\\FDL-CLD-001\\FDL-CLD-001_foto_HERCAS.png"
+  },
+  "Bello": {
+    "codigo": "FDL-BEL-001",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Bello\\FDL-BEL-001\\FDL-BEL-001_foto_HERCAS.png"
+  },
+  "Rionegro": {
+    "codigo": "FDL-RNG-019",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Rionegro\\FDL-RNG-019\\FDL-RNG-019_foto_HERCAS.png"
+  },
+  "Marinilla": {
+    "codigo": "FDL-MRL-002",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\Marinilla\\FDL-MRL-002\\FDL-MRL-002_foto_HERCAS.png"
+  },
+  "El Retiro": {
+    "codigo": "FDL-ERT-006",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\El Retiro\\FDL-ERT-006\\FDL-ERT-006_foto_HERCAS.png"
+  },
+  "San Jerónimo": {
+    "codigo": "FDL-SJR-001",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\FDL\\San Jerónimo\\FDL-SJR-001\\FDL-SJR-001_foto_HERCAS.png"
+  },
+  "Medellín y Antioquia": {
+    "codigo": "SAD-MDA-016",
+    "foto": "D:\\Aliados exteriores\\Fichas_HERCAS_2026\\SADY\\Medellín y Antioquia\\SAD-MDA-016\\SAD-MDA-016_foto_HERCAS.png"
+  }
+}
