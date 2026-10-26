@@ -1,31 +1,53 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import { ROOT } from '../../../lib/catalog';
+import { randomUUID } from 'node:crypto';
+import { supabaseServer } from '../../../lib/supabase-server';
+import { supabaseAdmin } from '../../../lib/supabase-admin';
+import { hasCatalogPermission } from '../../../lib/catalog-permission.mjs';
+import { catalogFromSupabase } from '../../../lib/catalog-supabase.mjs';
+import { buildProposal } from '../../../lib/proposal-cloud.mjs';
+import { uploadProposal } from '../../../lib/upload-proposal.mjs';
+
 export const dynamic = 'force-dynamic';
-const run = promisify(execFile);
+export const runtime = 'nodejs';
+export const maxDuration = 300;
+
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   const codes = body.codes;
-  if (!Array.isArray(codes) || codes.length < 1 || codes.length > 550 || codes.some(x => typeof x !== 'string' || !/^[A-Z0-9-]{3,25}$/.test(x)) || new Set(codes).size !== codes.length) {
-    return Response.json({ error: 'Selecciona entre 1 y 550 vallas válidas, sin repetir.' }, { status: 400 });
+  if (!Array.isArray(codes) || codes.length < 1 || codes.length > 550 || codes.some(x => typeof x !== 'string' || !/^[A-Z0-9]+(?:-[A-Z0-9]+)+$/.test(x)) || new Set(codes).size !== codes.length) {
+    return Response.json({error:'Selecciona entre 1 y 550 códigos válidos, sin repetir.'}, {status:400});
   }
-  const python = process.env.HERCAS_PYTHON || 'C:\\Users\\Administrador\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe';
-  const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'hercas-propuesta-'));
-  const output = path.join(folder, 'vallas_disponibles.pptx');
+  const client = await supabaseServer();
+  const { data: identity, error: authError } = await client.auth.getUser();
+  if (authError || !identity?.user) return Response.json({error:'Inicia sesión.'}, {status:401});
+  if (!await hasCatalogPermission(client, identity.user.id)) return Response.json({error:'Sin permiso.'}, {status:403});
   try {
-    const result = await run(python, [path.join(process.cwd(), 'scripts', 'make_proposal.py'), '--root', ROOT, '--codes', JSON.stringify(codes), '--output', output], { timeout: 600000, maxBuffer: 1024 * 1024, windowsHide: true, env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
-    const summary = JSON.parse(result.stdout);
-    const buffer = await fs.readFile(output);
-    const name = 'Vallas_disponibles_HERCAS_' + new Date().toISOString().slice(0,10) + '.pptx';
-    return new Response(buffer, { headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'Content-Disposition': 'attachment; filename="' + name + '"', 'Content-Length': String(buffer.length), 'X-Hercas-Slides': String(summary.slides), 'Cache-Control': 'no-store' } });
+    const catalog = await catalogFromSupabase(client);
+    const byCode = new Map(catalog.records.map(r => [r.codigo,r]));
+    const selected = codes.map(code => byCode.get(code));
+    if (selected.some(r => !r || !r.foto || !r.ficha || r.estadoFicha === 'duplicado_confirmado')) return Response.json({error:'Alguna valla seleccionada no tiene foto y ficha HERCAS.'}, {status:422});
+    const {data: photos, error: photoError} = await client.from('aliados_valla_archivos').select('codigo,ruta,subido_en').eq('tipo','foto').range(0,999);
+    if (photoError) throw photoError;
+    const photoByCode = new Map();
+    for (const photo of photos || []) if (!photoByCode.has(photo.codigo) || String(photo.subido_en) > String(photoByCode.get(photo.codigo).subido_en)) photoByCode.set(photo.codigo,photo);
+    const missing = codes.find(code => !photoByCode.has(code));
+    if (missing) return Response.json({error:`Falta la foto de ${missing}.`}, {status:422});
+    const getPhoto = async code => {
+      const storage = client.storage.from('aliados-vallas');
+      const path = photoByCode.get(code).ruta;
+      let response = await storage.download(path, {transform:{width:1280,height:720,resize:'cover',quality:60}});
+      if (response.error) response = await storage.download(path);
+      if (response.error || !response.data) throw new Error(`No se pudo abrir la foto de ${code}`);
+      return Buffer.from(await response.data.arrayBuffer());
+    };
+    const output = await buildProposal(selected,getPhoto);
+    const admin = supabaseAdmin();
+    const filename = `Vallas_disponibles_HERCAS_${new Date().toISOString().slice(0,10)}.pptx`;
+    const path = `propuestas/${new Date().toISOString().slice(0,10)}/${randomUUID()}.pptx`;
+    await uploadProposal({admin,path,output});
+    const signed = await client.storage.from('aliados-catalogos').createSignedUrl(path,600,{download:filename});
+    if (signed.error || !signed.data?.signedUrl) throw signed.error || new Error('No se pudo crear enlace');
+    return Response.json({url:signed.data.signedUrl, slides:1+new Set(selected.map(r=>r.ciudad)).size+selected.length, bytes:output.length}, {headers:{'Cache-Control':'no-store'}});
   } catch (error) {
-    const detail = error.stderr?.trim().split('\n').slice(-2).join(' ').slice(0,500);
-    return Response.json({ error: detail || error.message || 'No se pudo generar la presentación.' }, { status: 500 });
-  } finally {
-    await fs.rm(output, { force: true }).catch(() => {});
-    await fs.rmdir(folder).catch(() => {});
+    return Response.json({error:error.message || 'No se pudo preparar el PowerPoint.'}, {status:503});
   }
 }

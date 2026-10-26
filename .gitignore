@@ -1,4 +1,8 @@
 .env*
 !.env.example
 .next/
+.next-dev/
+.next-prod/
 node_modules/
+__pycache__/
+*.pyc

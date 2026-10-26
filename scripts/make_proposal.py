@@ -1,7 +1,6 @@
 import argparse
 import json
 from collections import OrderedDict
-from datetime import date
 from copy import deepcopy
 from io import BytesIO
 from math import cos, sin, pi
@@ -162,24 +161,13 @@ def copy_slide(deck, source):
 def create(root, codes, output):
     manifest = json.loads((root / "avance.json").read_text(encoding="utf-8"))
     by_code = {r["codigo_hercas"]: r for r in manifest["registros"]}
-    override_file = root / "catalogo_disponibilidad.json"
-    overrides = json.loads(override_file.read_text(encoding="utf-8")) if override_file.exists() else {}
     if not codes or len(codes) > 550 or len(set(codes)) != len(codes):
         raise ValueError("Seleccione entre 1 y 550 códigos únicos.")
     records = []
     for code in codes:
         r = by_code.get(code)
-        if not r or r.get("estado") != "completo" or not r.get("ficha_editable") or not Path(r["ficha_editable"]).is_file():
+        if not r or r.get("estado") == "duplicado_confirmado" or not r.get("ficha_editable") or not Path(r["ficha_editable"]).is_file() or not r.get("foto_HERCAS") or not Path(r["foto_HERCAS"]).is_file():
             raise ValueError(f"Ficha no disponible: {code}")
-        override = overrides.get(code, {})
-        availability = str(override.get("disponibilidad") or r.get("disponibilidad_fuente") or "").lower()
-        source_date = override.get("fecha") or r.get("fecha_fuente")
-        try:
-            recent = abs((date.today() - date.fromisoformat(str(source_date)[:10])).days) <= 14
-        except (TypeError, ValueError):
-            recent = False
-        if recent and "no disponible" in availability:
-            raise ValueError(f"Valla con indisponibilidad vigente: {code}")
         records.append(r)
     groups = OrderedDict()
     for r in sorted(records, key=lambda x: (str(x.get("ciudad") or "").casefold(), x["codigo_hercas"])):

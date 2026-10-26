@@ -1,51 +1,25 @@
-# Catálogo HERCAS (local)
+# Catálogo HERCAS
 
-Aplicación Next.js para consultar las vallas producidas en D:\Aliados exteriores\Fichas_HERCAS_2026.
+Aplicación Next.js para consultar las 549 vallas de aliados desde el proyecto Supabase `hercas-platform-dev`. La misma instancia autentica usuarios y guarda el catálogo en tablas `aliados_` y buckets privados. Las tablas de la web principal no se modifican.
 
-## Abrir
-Ejecutar Iniciar_catalogo_HERCAS.cmd y abrir http://127.0.0.1:3000.
-La ventana del servidor debe permanecer abierta. Las fotos y fichas se leen localmente.
+## Acceso y despliegue
 
-## Acceso
-El catálogo usa el mismo proyecto de Supabase que la página principal de Hercas. Se ingresa con la misma cuenta y contraseña, si el usuario tiene un rol activo con `cotizador.availability.read` o `cotizador.availability.manage`, los permisos que usa la web para consultar disponibilidad. La pantalla `/login` utiliza el mismo diseño de la web; recuperación de contraseña y activación de invitaciones se abren en hercaspublicidad.com. El botón «Cerrar sesión» termina la sesión local del catálogo.
+Copiar `.env.example` a `.env.local` para desarrollo. Configurar `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` en los tres entornos de Vercel. Configurar `SUPABASE_SECRET_KEY` **solo como variable de servidor** en Vercel para guardar las propuestas compuestas. Nunca poner esta clave en una variable `NEXT_PUBLIC_` ni en Git. `npm run build` verifica la compilación y `npm run dev` sirve la app local.
 
-La URL y la clave publicable de Supabase están en `.env.local`. Este archivo no debe compartirse con el código fuente; `.env.example` documenta los nombres requeridos. Al instalar en otro computador, se necesitan el mismo `.env.local` y acceso a los archivos del inventario. Todas las rutas del catálogo y sus API requieren sesión válida.
+Los usuarios con `cotizador.availability.read` pueden consultar el catálogo y componer propuestas. El permiso `cotizador.availability.manage` permite subir y aplicar disponibilidades semanales. Fotos, fichas y catálogos permanecen en Storage privado. La API entrega enlaces temporales después de validar la sesión.
 
-## Buscar
-- Buscar por código, dirección, ciudad, proveedor o formato.
-- Filtrar por ciudad y aliado.
-- Abrir la foto HERCAS y descargar la ficha PowerPoint con precio editable.
-- El mapa solo coloca puntos con coordenadas válidas; las demás vallas se encuentran por ciudad y dirección.
-- Una disponibilidad con fuente de más de 14 días aparece «Por confirmar».
+## Consulta y propuestas
 
-## Actualizar disponibilidades
-1. Abrir «Actualizar catálogo».
-2. Elegir aliado y cargar XLSX, CSV, PPTX o PDF con texto seleccionable.
-3. Revisar coincidencias. Solo se aplican cambios explícitos con coincidencia única y alta confianza.
-4. Pulsar «Aplicar coincidencias seguras». Los casos dudosos quedan en catalogo_nuevas_pendientes.json.
-5. El archivo original se conserva en _catalogos_entrantes.
+Buscar por código, ciudad, dirección, proveedor o formato. Filtrar por disponibilidad y seleccionar una valla o todas las visibles después de filtrar. La selección exige foto HERCAS y ficha editable; la disponibilidad puede estar «Por confirmar», por lo que debe consultarse al aliado antes de contratar. El mapa agrupa por ciudad las vallas sin coordenadas verificadas.
 
-No se borra una valla por ausencia en un catálogo semanal. Los PPTX o PDF hechos solo de imágenes requieren OCR o revisión manual.
+La descarga masiva crea un PowerPoint con portada «Vallas disponibles», un separador con fotografía urbana por cada ciudad seleccionada y una diapositiva por valla. Los precios son texto editable. El archivo se guarda en `aliados-catalogos/propuestas/` y se descarga mediante URL temporal.
 
-## Fuente y almacenamiento
-- Inventario base: avance.json (549 registros).
-- Cambios de disponibilidad: catalogo_disponibilidad.json.
-- Archivos y análisis: _catalogos_entrantes.
-- Nuevas vallas o coincidencias dudosas: catalogo_nuevas_pendientes.json.
+## Actualización semanal
 
-Las fotos HERCAS y fichas de vallas nuevas requieren confirmar la foto fuente, ubicación y creatividad. No se publican como terminadas automáticamente.
+Quien tenga permiso de gestión selecciona aliado y archivo PPTX, PDF, XLSX o CSV. El navegador carga el archivo directamente al bucket privado; los archivos mayores de 6 MB usan carga reanudable. El servidor compara códigos y ubicación con las vallas de ese aliado. La interfaz muestra coincidencias únicas y casos para revisar. Solo al pulsar «Aplicar coincidencias seguras» se generan eventos históricos en `aliados_disponibilidad_eventos`. Una disponibilidad con más de ocho días se muestra «Por confirmar». Una lista completa solo pone las ausentes «Por confirmar» si al menos tres coincidencias son seguras y cubren 80 % de las entradas identificadas. Las vallas nuevas quedan en `aliados_importacion_filas` hasta verificar foto y ubicación; no se fabrican fichas automáticamente.
 
-## Presentación con varias vallas
+Los PPTX o PDF formados solo por imágenes requieren OCR o revisión manual. Se conserva el original en Storage y el archivo local `D:\Aliados exteriores\Fichas_HERCAS_2026` como respaldo de la migración.
 
-En «Explorar vallas», marca las fichas que quieres incluir. El botón «Seleccionar resultados» añade todas las fichas completas que cumplen los filtros visibles de ciudad, aliado y búsqueda. Pulsa «Descargar PowerPoint».
+## Verificación
 
-La presentación resultante contiene:
-1. Portada «Vallas disponibles».
-2. Una separación con el nombre de cada ciudad.
-3. Las fichas de esa ciudad, con el precio editable.
-
-Si seleccionas varias ciudades, se agrupan alfabéticamente y cada grupo comienza con su ciudad. La disponibilidad debe confirmarse antes de ofrecer; el inventario histórico no equivale a cupo vigente.
-
-## Acceso desde otros computadores
-
-Los datos y archivos siguen en este computador. La versión actual escucha solo en 127.0.0.1 y por eso aún no admite conexiones de los otros dos equipos. Se necesita definir si estarán en la misma red o en otras sedes y configurar acceso privado antes de habilitarlo.
+`node --test tests/*.test.mjs` y `npm run build`. El importador inicial reanudable es `node scripts/upload_catalog_initial.mjs --upload "D:\Aliados exteriores\Fichas_HERCAS_2026\_migracion_supabase\preparado.json"`; registra el avance en `subida_avance.json`. Al finalizar, `node scripts/verify_catalog_cloud.mjs` comprueba códigos, tipos de archivo y tamaños registrados.

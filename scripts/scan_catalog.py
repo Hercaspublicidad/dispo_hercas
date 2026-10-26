@@ -9,11 +9,16 @@ def norm(value):
 
 def availability(text):
     t = norm(text)
-    if re.search(r"\b(NO DISPONIBLE|NO DISPONIBILIDAD|OCUPADA|OCUPADO|RESERVADA|RESERVADO|VENDIDA|VENDIDO)\b", t):
+    if re.search(r"\b(NO DISPONIBLES?|NO DISPONIBILIDAD|OCUPAD[AO]S?|RESERVAD[AO]S?|VENDID[AO]S?)\b", t):
         return "No disponible"
     if re.search(r"\b(DISPONIBLE|LIBRE|VACANTE)\b", t):
         return "Disponible"
     return None
+
+def inferred_status(explicit, full_snapshot, extension):
+    if explicit:
+        return explicit
+    return "Disponible" if full_snapshot and extension in (".pptx", ".pdf") else None
 
 def xlsx_items(file):
     from openpyxl import load_workbook
@@ -74,7 +79,8 @@ def match(item, candidates):
         rc = norm(r["codigo_hercas"])
         provider_code = norm(r.get("codigo_proveedor"))
         loc = norm(r.get("ubicacion"))
-        if code and (code == rc or code == provider_code):
+        code_in_text = any(token and len(token) >= 4 and re.search(r"(?<![A-Z0-9])" + re.escape(token) + r"(?![A-Z0-9])", text) for token in (rc, provider_code))
+        if (code and (code == rc or code == provider_code)) or code_in_text:
             score = 1.0
         elif loc and len(loc) >= 12 and loc in text:
             score = .94
@@ -91,6 +97,7 @@ def match(item, candidates):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--file", required=True); ap.add_argument("--provider", required=True); ap.add_argument("--root", required=True)
+    ap.add_argument("--full-snapshot", action="store_true")
     a = ap.parse_args(); file = Path(a.file); root = Path(a.root)
     readers = {".xlsx":xlsx_items, ".csv":csv_items, ".pptx":pptx_items, ".pdf":pdf_items}
     items = readers[file.suffix.lower()](file)
@@ -99,12 +106,12 @@ def main():
     proposals = []
     for item in items:
         hits = match(item, candidates)
-        status = availability(item["status"]) or availability(item["text"])
+        status = inferred_status(availability(item["status"]) or availability(item["text"]), a.full_snapshot, file.suffix.lower())
         unique = bool(hits and hits[0]["score"] >= .9 and (len(hits) == 1 or hits[0]["score"]-hits[1]["score"] >= .08))
-        if hits or item["code"] or item["address"] or status:
+        if hits or item["code"] or item["address"]:
             proposals.append(dict(ref=item["ref"], code=item["code"], city=item["city"], address=item["address"], status=status, matches=hits, action=("actualizar" if unique and status else "nueva_o_revision"), selected=unique and bool(status), excerpt=item["text"][:500]))
     stage_id = uuid.uuid4().hex
-    stage = dict(id=stage_id, file=str(file), provider=a.provider, scannedAt=datetime.now(timezone.utc).isoformat(), proposals=proposals)
+    stage = dict(id=stage_id, file=str(file), provider=a.provider, scannedAt=datetime.now(timezone.utc).isoformat(), fullSnapshot=a.full_snapshot, scanned=len(items), proposals=proposals)
     stage_dir = root/"_catalogos_entrantes"/"analisis"; stage_dir.mkdir(parents=True, exist_ok=True)
     (stage_dir/f"{stage_id}.json").write_text(json.dumps(stage, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(dict(stageId=stage_id, file=str(file), provider=a.provider, scanned=len(items), proposals=proposals, note="La disponibilidad solo se aplica a coincidencias únicas y explícitas. Los registros nuevos requieren validación y fotografía."), ensure_ascii=False))
