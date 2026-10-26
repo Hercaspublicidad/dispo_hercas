@@ -40,6 +40,8 @@ def main(root):
             status = "copia_duplicada"
         elif sha in old_sources:
             status = "archivo_ya_en_549"
+        elif sha in fiches:
+            status = "en_produccion"
         else:
             status = "pendiente_desglose"
         entries.append({
