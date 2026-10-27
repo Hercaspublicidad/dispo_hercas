@@ -12,6 +12,7 @@ const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mms
 const manifest = JSON.parse(await readFile(process.argv[2], 'utf8'));
 const code = manifest.codigo;
 if (!/^[A-Z0-9-]+$/.test(code)) throw new Error('Código inválido');
+const priceDigits = String(manifest.precio_texto || '').replace(/[^\d]/g, '');
 for (const file of [manifest.foto, manifest.ficha, manifest.vista_previa]) {
   if (!(await stat(file)).isFile()) throw new Error(`Falta archivo: ${file}`);
 }
@@ -24,7 +25,7 @@ const row = {
   ubicacion: manifest.ubicacion, categoria: manifest.categoria || 'Pantalla en aeropuerto',
   formato: manifest.formato, medidas: manifest.medidas,
   latitud: manifest.latitud ?? null, longitud: manifest.longitud ?? null,
-  tarifa_mensual_cop: Number(manifest.precio_texto.replace(/[^\d]/g, '')),
+  tarifa_mensual_cop: priceDigits ? Number(priceDigits) : null,
   estado: manifest.estado || 'revision_fuente', fuente_local_id: `${manifest.fuente}#${manifest.diapositiva || manifest.pagina}`,
   datos_fuente: {
     entorno: manifest.entorno, tipo_soporte: manifest.tipo_soporte,
@@ -38,6 +39,9 @@ const row = {
 if (!existing) {
   const { error: insertError } = await client.from('aliados_vallas').insert(row);
   if (insertError) throw insertError;
+} else {
+  const { error: updateError } = await client.from('aliados_vallas').update(row).eq('codigo', code);
+  if (updateError) throw updateError;
 }
 for (const [tipo, file] of [['foto', manifest.foto], ['vista', manifest.vista_previa], ['ficha', manifest.ficha]]) {
   const bytes = await readFile(file);

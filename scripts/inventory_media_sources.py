@@ -21,7 +21,7 @@ def describe(path, root):
     result = {
         "path": str(path), "relative": str(relative), "area": relative.parts[0],
         "source_group": relative.parts[1] if len(relative.parts) > 2 else "",
-        "extension": path.suffix.lower(), "bytes": path.stat().st_size,
+        "extension": ".pptx" if path.name.lower() == ".pptx" else path.suffix.lower(), "bytes": path.stat().st_size,
         "sha256": fingerprint(path), "pages": None, "samples": [], "images": None,
     }
     try:
