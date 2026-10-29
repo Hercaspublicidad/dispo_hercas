@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
-import { hasCatalogPermission } from './lib/catalog-permission.mjs';
+import { hasCatalogPermission, hasCatalogAdminRole } from './lib/catalog-permission.mjs';
 
 function safeNext(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
@@ -42,7 +42,16 @@ export async function middleware(request) {
     response.cookies.getAll().forEach(cookie => redirect.cookies.set(cookie));
     return redirect;
   }
-  if (signedIn && permitted) return response;
+  if (signedIn && permitted) {
+    if (pathname === '/admin' || pathname.startsWith('/admin/') || pathname.startsWith('/api/admin/')) {
+      try {
+        if (!await hasCatalogAdminRole(supabase,data.claims.sub)) return pathname.startsWith('/api/')
+          ? NextResponse.json({error:'Solo el administrador de plataforma puede gestionar vallas.'},{status:403})
+          : NextResponse.redirect(new URL('/',request.url));
+      } catch {return new Response('No se pudo validar el acceso de administrador.',{status:503});}
+    }
+    return response;
+  }
   if (pathname.startsWith('/api/')) {
     return NextResponse.json({ error: signedIn ? 'Tu cuenta no tiene permiso para consultar disponibilidad.' : 'Inicia sesión para continuar.' }, { status: signedIn ? 403 : 401, headers: { 'Cache-Control': 'no-store' } });
   }

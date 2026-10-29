@@ -20,6 +20,18 @@ Quien tenga permiso de gestión selecciona aliado y archivo PPTX, PDF, XLSX o CS
 
 Los PPTX o PDF formados solo por imágenes requieren OCR o revisión manual. Se conserva el original en Storage y el archivo local `D:\Aliados exteriores\Fichas_HERCAS_2026` como respaldo de la migración.
 
-## Verificación
+## Administración de vallas
+
+El panel `/admin` está reservado al rol activo `systems_admin` (Administrador de plataforma). Permite crear, buscar, editar, eliminar del catálogo y restaurar vallas. Las operaciones se protegen en middleware, página, API y función SQL. No basta con tener permiso de gestión de disponibilidad.
+
+Aplicar `supabase/migrations/20261029160000_aliados_admin_crud.sql` antes de usar el guardado. La función solo es ejecutable por `service_role`, comprueba el rol del usuario y guarda metadatos y registro de foto en una transacción con control de edición concurrente. Requiere la variable de servidor `SUPABASE_SECRET_KEY` ya usada por las propuestas. No requiere cambios en roles ni permisos existentes.
+
+El formulario acepta JPG, PNG y WebP de hasta 4 MB y 40 megapíxeles. El servidor verifica la imagen, corrige orientación, limita dimensiones a 2400 × 1800 y guarda WebP con calidad 85 en el bucket privado. Los PNG existentes se conservan hasta reemplazarlos. Se conserva la procedencia del registro y sus archivos anteriores. Eliminar significa archivar; el código permanece reservado y se puede restaurar desde el panel.
+
+Tras editar una valla, su ficha individual se genera con los datos y la foto actuales, utilizando el mismo diseño que la propuesta masiva. Los PowerPoint descargados anteriormente conservan su contenido. La disponibilidad continúa gestionándose con los archivos semanales. La importación masiva de metadatos o ZIP de fotos todavía no está incluida.
+
+Pruebas: `node --test --test-isolation=none tests/*.test.mjs`. Las comprobaciones de base de datos están en `tests/valla-admin-transaction.sql`; se ejecutan en una transacción que termina con `rollback`.
+
+## Verificación del catálogo
 
 `node --test tests/*.test.mjs` y `npm run build`. La compilación de producción se guarda en `.next`, como espera Vercel; el desarrollo usa `.next-dev`. El importador inicial reanudable es `node scripts/upload_catalog_initial.mjs --upload "D:\Aliados exteriores\Fichas_HERCAS_2026\_migracion_supabase\preparado.json"`; registra el avance en `subida_avance.json`. Al finalizar, `node scripts/verify_catalog_cloud.mjs` comprueba códigos, tipos de archivo y tamaños registrados.

@@ -25,8 +25,13 @@ export async function POST(request) {
     const byCode = new Map(catalog.records.map(r => [r.codigo,r]));
     const selected = codes.map(code => byCode.get(code));
     if (selected.some(r => !r || !r.foto || !r.ficha || r.estadoFicha === 'duplicado_confirmado')) return Response.json({error:'Alguna valla seleccionada no tiene foto y ficha HERCAS.'}, {status:422});
-    const {data: photos, error: photoError} = await client.from('aliados_valla_archivos').select('codigo,ruta,subido_en').eq('tipo','foto').range(0,999);
-    if (photoError) throw photoError;
+    const photos = [];
+    for (let start = 0; ; start += 500) {
+      const result = await client.from('aliados_valla_archivos').select('codigo,ruta,subido_en').eq('tipo','foto').in('codigo',codes).order('ruta').range(start,start+499);
+      if (result.error) throw result.error;
+      photos.push(...result.data);
+      if (result.data.length < 500) break;
+    }
     const photoByCode = new Map();
     for (const photo of photos || []) if (!photoByCode.has(photo.codigo) || String(photo.subido_en) > String(photoByCode.get(photo.codigo).subido_en)) photoByCode.set(photo.codigo,photo);
     const missing = codes.find(code => !photoByCode.has(code));
