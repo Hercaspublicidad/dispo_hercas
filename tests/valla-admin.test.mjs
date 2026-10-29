@@ -10,6 +10,34 @@ import {buildIndividualFiche,buildProposal} from '../lib/proposal-cloud.mjs';
 
 const input = {codigo:'TEST-BOG-001',proveedor:'Aliado',ciudad:'Bogotá',ubicacion:'Carrera 7',estado:'revision_fuente',tarifa_mensual_cop:'1250000',latitud:'',longitud:'',entorno:'exterior',tipo_soporte:'estatica'};
 
+test('estrato, iluminación y flujo se validan, conservan y muestran sin perder ceros',()=>{
+  const saved=validateValla({...input,estrato:'3',iluminacion:' LED nocturna ',flujo_personas_vehiculos:'12500'});
+  assert.equal(saved.datos_fuente.estrato,3);
+  assert.equal(saved.datos_fuente.iluminacion,'LED nocturna');
+  assert.equal(saved.datos_fuente.flujo_personas_vehiculos,12500);
+  const edited=validateValla(input,saved);
+  assert.equal(edited.datos_fuente.estrato,3);
+  assert.equal(edited.datos_fuente.iluminacion,'LED nocturna');
+  assert.equal(edited.datos_fuente.flujo_personas_vehiculos,12500);
+  const cleared=validateValla({...input,estrato:'',iluminacion:'',flujo_personas_vehiculos:''},saved);
+  assert.equal(cleared.datos_fuente.estrato,null);assert.equal(cleared.datos_fuente.flujo_personas_vehiculos,null);assert.equal(cleared.datos_fuente.iluminacion,'');
+  for(const changes of [{estrato:'texto'},{estrato:-1},{estrato:true},{iluminacion:12},{iluminacion:'x'.repeat(151)},{flujo_personas_vehiculos:-1},{flujo_personas_vehiculos:Infinity},{flujo_personas_vehiculos:false}])assert.throws(()=>validateValla({...input,...changes}));
+  const zero=validateValla({...input,estrato:0,flujo_personas_vehiculos:0});
+  const record=mapRemoteCatalog([zero],[],[],[]).records[0];
+  assert.equal(record.estrato,0);assert.equal(record.flujo_personas_vehiculos,0);
+});
+
+test('los nuevos datos aparecen en las fichas y propuestas incluso sin precio',async()=>{
+  const photo=await sharp({create:{width:160,height:90,channels:3,background:'#abcde0'}}).webp().toBuffer();
+  const record={codigo:input.codigo,ciudad:'Bogotá',proveedor:'Aliado',foto:true,ficha:true,estrato:3,iluminacion:'LED nocturna',flujo_personas_vehiculos:12500,tarifa:9999999};
+  for(const bytes of [await buildIndividualFiche(record,photo),await buildProposal([record],async()=>photo)]) {
+    const zip=await JSZip.loadAsync(bytes);
+    const xml=(await Promise.all(Object.keys(zip.files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name)).map(name=>zip.file(name).async('string')))).join('');
+    for(const text of ['Estrato: 3','Iluminación: LED nocturna','Flujo personas / vehículos: 12.500'])assert.ok(xml.includes(text),text);
+    assert.ok(!xml.includes('9.999.999'));
+  }
+});
+
 test('solo systems_admin activo tiene acceso al CRUD; gestionar disponibilidad no basta',async()=>{
   const client = roles => ({from:()=>({select(){return this;},eq(){return this;},is:async()=>({data:roles,error:null})})});
   assert.equal(await hasCatalogAdminRole(client([{role:'systems_admin'}]),'u'),true);

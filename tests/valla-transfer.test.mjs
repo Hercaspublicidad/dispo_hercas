@@ -6,6 +6,19 @@ import {buildTransferArchive,readTransferArchive,readZipEntry} from '../lib/vall
 
 const row={codigo:'TEST-CAL-001',proveedor:'Aliado',ciudad:'Cali',ubicacion:'Carrera 7; esquina "azul"\nPiso 2',estado:'completo',tarifa_mensual_cop:2500000,latitud:-3.4,longitud:-76.5,datos_fuente:{codigo_proveedor:'EXT-201',archivo_fuente_nombre:'original.pptx',entorno:'exterior',tipo_soporte:'estatica'},actualizado_en:'2026-10-29T15:00:00Z'};
 
+test('CSV exporta e importa los nuevos campos y los archivos antiguos no los borran',()=>{
+  const previous={...row,datos_fuente:{...row.datos_fuente,estrato:4,iluminacion:'Sin iluminación',flujo_personas_vehiculos:0}};
+  const snapshot=validateTransferInput({codigo:row.codigo},previous);
+  const csv=encodeTransferCsv([{...snapshot,...snapshot.datos_fuente}]);
+  const imported=validateTransferInput(decodeTransferCsv(csv)[0]);
+  assert.equal(imported.datos_fuente.estrato,4);assert.equal(imported.datos_fuente.iluminacion,'Sin iluminación');assert.equal(imported.datos_fuente.flujo_personas_vehiculos,0);
+  const legacy=decodeTransferCsv('codigo;ciudad\nTEST-CAL-001;Bogotá')[0];
+  const updated=validateTransferInput(legacy,previous);
+  assert.equal(updated.ciudad,'Bogotá');assert.equal(updated.datos_fuente.estrato,4);assert.equal(updated.datos_fuente.flujo_personas_vehiculos,0);
+  const cleared=validateTransferInput({codigo:row.codigo,estrato:'',iluminacion:'',flujo_personas_vehiculos:''},previous);
+  assert.equal(cleared.datos_fuente.estrato,null);assert.equal(cleared.datos_fuente.flujo_personas_vehiculos,null);
+});
+
 test('CSV editable conserva delimitadores, saltos, comillas, coordenadas y neutraliza fórmulas',()=>{
   const csv=encodeTransferCsv([{...row,ubicacion:row.ubicacion,codigo_proveedor:'=HYPERLINK("url")'}]);
   assert.ok(csv.includes("'=HYPERLINK"));
