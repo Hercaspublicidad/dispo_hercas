@@ -45,3 +45,20 @@ El buscador del catálogo y el de administración incluyen el código del aliado
 Después de desplegar esta versión, el administrador puede abrir «PowerPoint antiguos», revisar el listado y eliminar las fichas individuales de Supabase. La limpieza solo considera archivos `.pptx` bajo `<codigo>/ficha/` del bucket `aliados-vallas` con una foto registrada. Conserva fotos, vistas, propuestas y fichas sin foto o con rutas distintas. Elimina mediante la API de Storage y después borra las referencias confirmadas; no requiere una migración SQL. No ejecutar la limpieza desde una versión anterior del sitio.
 
 Para obtener un inventario sin modificar Supabase: `node --env-file=.env.local scripts/inspect_legacy_fiches.mjs`. El listado se guarda fuera de Git en `_trabajo_fondos/limpieza_fichas/inventario.json`. La carga de una plantilla personalizada desde administración queda pendiente.
+
+## Importación y exportación masiva desde administración
+
+El panel `/admin` incluye «Importar y exportar vallas», exclusivo de `systems_admin` activo. «Preparar exportación completa» divide el inventario en paquetes de aproximadamente 64 MB, con hasta 100 vallas por paquete. Descarga todos los paquetes para obtener el inventario completo, incluidos los registros archivados, todas las versiones registradas de fotos y las vistas previas. No incluye los PowerPoint generados ni los catálogos semanales. Cada ZIP contiene:
+
+- `vallas.csv`: campos comerciales editables, separados por punto y coma, con código HERCAS, código del aliado, precio, coordenadas, formato, estado y ruta de la foto principal.
+- `datos.json`: copia completa de los registros exportados, procedencia y relación de las imágenes adicionales.
+- `imagenes/<codigo>/...`: los archivos originales registrados en Storage.
+- `LEEME.txt`: instrucciones de importación.
+
+También puedes exportar solo los datos a CSV o descargar una plantilla ZIP vacía. Para nuevas vallas, completa `codigo`, `proveedor` y `ciudad`; agrega dirección, estado y demás datos cuando estén disponibles. Usa números sin separadores de miles y punto para decimales. En la columna `foto`, indica la ruta dentro del ZIP, por ejemplo `imagenes/TEST-CAL-001/foto.jpg`. Conserva `datos.json` si vas a volver a importar una exportación para conservar procedencia e imágenes adicionales. Los campos auditados y la condición de archivado no se toman del manifiesto. La disponibilidad semanal y su historial continúan gestionándose por separado.
+
+«Revisar importación» admite ZIP de hasta 120 MB o CSV de hasta 2 MB sin imágenes; hasta 2.000 filas por archivo. Revisa formato, códigos repetidos, campos y archivos faltantes antes de guardar. Los CSV parciales conservan columnas omitidas; los campos opcionales presentes y vacíos se limpian. Una foto vacía conserva la actual. Las nuevas filas válidas se seleccionan automáticamente; las existentes requieren selección individual tras revisar sus cambios. Las archivadas deben restaurarse antes de actualizarlas. Las vallas ausentes del archivo no se eliminan.
+
+Al aplicar, cada fila y cada imagen se guarda por separado, con control de versión y progreso. Las imágenes se preparan en WebP con hasta 2400 × 1800 píxeles y se validan nuevamente en el servidor. Las WebP ya preparadas se conservan sin recodificar. Si una imagen falla, la tabla indica que los datos ya se guardaron; se pueden reintentar las operaciones pendientes mientras permanezca abierta la revisión. «Detener» finaliza la operación en curso y conserva las filas guardadas. No se trata de una transacción global ni de una restauración de todo el proyecto Supabase.
+
+El endpoint `/api/admin/transfer` exige sesión administrativa y valida el origen en las escrituras. Cada petición contiene una fila o una imagen de hasta 4 MB para funcionar dentro de los límites de Vercel. Utiliza la función `aliados_admin_save` ya existente: no requiere una nueva migración SQL.

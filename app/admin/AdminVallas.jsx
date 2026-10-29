@@ -1,4 +1,5 @@
 'use client';
+import AdminTransfer from './AdminTransfer';
 import AdminLegacyFiches from './AdminLegacyFiches';
 import {matchesCatalogSearch} from '../../lib/catalog-search.mjs';
 import {useEffect, useMemo, useRef, useState} from 'react';
@@ -112,6 +113,7 @@ export default function AdminVallas() {
       <section className="admin-metrics" aria-label="Resumen del inventario"><div><strong>{rows.filter(r=>!r.datos_fuente?.archivado_en).length}</strong><span>En inventario</span></div><div><strong>{rows.filter(r=>!r.datos_fuente?.archivado_en&&r.foto).length}</strong><span>Con fotografía</span></div><div><strong>{rows.filter(r=>!r.datos_fuente?.archivado_en&&!r.foto).length}</strong><span>Sin fotografía</span></div></section>
       {notice&&<div className="admin-success" role="status">{notice}<button aria-label="Cerrar mensaje" onClick={()=>setNotice('')}>×</button></div>}
       {error&&<div className="admin-error" role="alert">{error}</div>}
+      <AdminTransfer onChanged={refresh}/>
       <AdminLegacyFiches/>
       <div className="admin-toolbar"><label className="admin-search">Buscar vallas<input type="search" value={query} placeholder="Código HERCAS, código del aliado, ciudad o dirección" onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label><label>Mostrar<select value={scope} onChange={e=>{setScope(e.target.value);setPage(1);}}><option value="activas">En inventario</option><option value="eliminadas">Eliminadas</option><option value="todas">Todas</option></select></label><button className="secondary" onClick={()=>{setLoading(true);setError('');refresh().catch(e=>setError(e.message)).finally(()=>setLoading(false));}} disabled={loading}>Recargar</button></div>
       <section className="admin-table-wrap" aria-label="Listado de vallas" aria-busy={loading}>
