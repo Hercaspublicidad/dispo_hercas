@@ -6,3 +6,5 @@
 node_modules/
 __pycache__/
 *.pyc
+
+_trabajo_fondos/limpieza_fichas/

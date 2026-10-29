@@ -15,7 +15,7 @@ export async function GET(_request, { params }) {
     const {data:{user}} = await supabase.auth.getUser();
     if (!user || !await hasCatalogAdminRole(supabase,user.id)) return new Response('Archivo no disponible', {status:404});
   }
-  if (kind === 'ficha' && valla.datos_fuente?.gestion_admin) {
+  if (kind === 'ficha') {
     const {data:photo,error} = await supabase.from('aliados_valla_archivos').select('*').eq('codigo',code).eq('tipo','foto').order('subido_en',{ascending:false}).limit(1);
     if (error) return new Response('No se pudo consultar la foto', {status:503});
     if (!photo?.length) return new Response('Añade una foto para generar la ficha', {status:404});

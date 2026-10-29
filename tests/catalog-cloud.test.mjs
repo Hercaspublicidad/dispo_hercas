@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { catalogFromSupabase } from '../lib/catalog-supabase.mjs';
+import { catalogFromSupabase, mapRemoteCatalog } from '../lib/catalog-supabase.mjs';
 
 test('el catálogo remoto pagina filas y marca archivos existentes', async () => {
   const rows = [
@@ -22,4 +22,11 @@ test('el catálogo remoto pagina filas y marca archivos existentes', async () =>
   assert.equal(result.records[0].fechaDisponibilidad, '2026-09-07');
   assert.equal(result.records[1].estadoFicha, 'duplicado_confirmado');
   assert.equal(result.pendingNew.length, 0);
+});
+
+test('las vallas antiguas con foto siguen listas después de eliminar su PowerPoint',()=>{
+  const vallas = [{codigo:'OLD-CAL-001',estado:'completo',datos_fuente:{}}, {codigo:'OLD-CAL-002',estado:'completo',datos_fuente:{}}];
+  const result = mapRemoteCatalog(vallas,[{codigo:'OLD-CAL-001',tipo:'foto'}, {codigo:'OLD-CAL-002',tipo:'ficha'}],[],[]);
+  assert.equal(result.records[0].ficha,true);
+  assert.equal(result.records[1].ficha,false);
 });

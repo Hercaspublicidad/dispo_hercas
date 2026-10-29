@@ -35,3 +35,13 @@ Pruebas: `node --test --test-isolation=none tests/*.test.mjs`. Las comprobacione
 ## Verificación del catálogo
 
 `node --test tests/*.test.mjs` y `npm run build`. La compilación de producción se guarda en `.next`, como espera Vercel; el desarrollo usa `.next-dev`. El importador inicial reanudable es `node scripts/upload_catalog_initial.mjs --upload "D:\Aliados exteriores\Fichas_HERCAS_2026\_migracion_supabase\preparado.json"`; registra el avance en `subida_avance.json`. Al finalizar, `node scripts/verify_catalog_cloud.mjs` comprueba códigos, tipos de archivo y tamaños registrados.
+
+## Fichas al descargar y precios opcionales
+
+Todas las vallas con foto generan su ficha individual al descargar usando el diseño HERCAS actual. El catálogo y las propuestas ya no requieren un PowerPoint guardado por valla. Las fichas y propuestas se generan sin precio de forma predeterminada. Cualquier usuario con acceso al catálogo puede marcar «Incluir precios en las fichas y presentaciones»; no requiere un rol administrativo. La API masiva recibe `includePrices: true`; la individual acepta `?includePrices=true`. Sin esa selección se omiten tarifa y condiciones comerciales para que estas no introduzcan precios en la descarga. El precio continúa visible en la consulta del catálogo y en administración.
+
+El buscador del catálogo y el de administración incluyen el código del aliado (`datos_fuente.codigo_proveedor`), además del código HERCAS, ubicación, ciudad, proveedor y formato.
+
+Después de desplegar esta versión, el administrador puede abrir «PowerPoint antiguos», revisar el listado y eliminar las fichas individuales de Supabase. La limpieza solo considera archivos `.pptx` bajo `<codigo>/ficha/` del bucket `aliados-vallas` con una foto registrada. Conserva fotos, vistas, propuestas y fichas sin foto o con rutas distintas. Elimina mediante la API de Storage y después borra las referencias confirmadas; no requiere una migración SQL. No ejecutar la limpieza desde una versión anterior del sitio.
+
+Para obtener un inventario sin modificar Supabase: `node --env-file=.env.local scripts/inspect_legacy_fiches.mjs`. El listado se guarda fuera de Git en `_trabajo_fondos/limpieza_fichas/inventario.json`. La carga de una plantilla personalizada desde administración queda pendiente.
