@@ -13,7 +13,7 @@ for (const route of ['/api/catalog', '/api/asset/MV-BAQ-001/ficha', '/api/admin/
   const response = await fetch(`${base}${route}`);
   assert.equal(response.status, 401, `${route} must reject anonymous access`);
 }
-for (const route of ['/api/proposal', '/api/import', '/api/import/apply', '/api/admin/transfer']) {
+for (const route of ['/api/proposal', '/api/import', '/api/import/apply', '/api/admin/transfer', '/api/admin/transfer/export']) {
   const response = await fetch(`${base}${route}`, {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
   });
