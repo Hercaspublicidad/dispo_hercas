@@ -12,6 +12,7 @@ export const maxDuration = 300;
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
+  if (body.includePrices !== undefined && typeof body.includePrices !== 'boolean') return Response.json({error:'La opción de precios debe ser verdadera o falsa.'}, {status:400});
   const codes = body.codes;
   if (!Array.isArray(codes) || codes.length < 1 || codes.length > 550 || codes.some(x => typeof x !== 'string' || !/^[A-Z0-9]+(?:-[A-Z0-9]+)+$/.test(x)) || new Set(codes).size !== codes.length) {
     return Response.json({error:'Selecciona entre 1 y 550 códigos válidos, sin repetir.'}, {status:400});
@@ -44,7 +45,7 @@ export async function POST(request) {
       if (response.error || !response.data) throw new Error(`No se pudo abrir la foto de ${code}`);
       return Buffer.from(await response.data.arrayBuffer());
     };
-    const output = await buildProposal(selected,getPhoto);
+    const output = await buildProposal(selected,getPhoto,{includePrices:body.includePrices === true});
     const admin = supabaseAdmin();
     const filename = `Vallas_disponibles_HERCAS_${new Date().toISOString().slice(0,10)}.pptx`;
     const path = `propuestas/${new Date().toISOString().slice(0,10)}/${randomUUID()}.pptx`;

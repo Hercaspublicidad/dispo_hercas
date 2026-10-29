@@ -52,7 +52,7 @@ test('vallas eliminadas salen del catálogo y las gestionadas con foto generan f
 test('ficha individual y propuesta incluyen los datos editados y una foto WebP',async()=>{
   const photo = await sharp({create:{width:320,height:180,channels:3,background:'#5588aa'}}).webp().toBuffer();
   const record = {codigo:'TEST-BOG-001',ciudad:'Ciudad editada',proveedor:'Aliado editado',ubicacion:'Dirección editada',formato:'Formato editado',medidas:'15 x 5',tarifa:1234567,condicionesComerciales:'IVA adicional; precio mensual.',foto:true,ficha:true};
-  for(const [bytes,count] of [[await buildIndividualFiche(record,photo),1],[await buildProposal([record],async()=>photo),3]]) {
+  for(const [bytes,count] of [[await buildIndividualFiche(record,photo,{includePrices:true}),1],[await buildProposal([record],async()=>photo,{includePrices:true}),3]]) {
     const zip = await JSZip.loadAsync(bytes);
     const slides = Object.keys(zip.files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name));
     assert.equal(slides.length,count);

@@ -24,7 +24,7 @@ export async function GET(_request, { params }) {
       if (image.error) throw image.error;
       const current = {...valla, datos_fuente:{...valla.datos_fuente,archivado_en:null}};
       const record = mapRemoteCatalog([current],photo,[],[]).records[0];
-      const bytes = await buildIndividualFiche(record,Buffer.from(await image.data.arrayBuffer()));
+      const bytes = await buildIndividualFiche(record,Buffer.from(await image.data.arrayBuffer()),{includePrices:new URL(_request.url).searchParams.get('includePrices') === 'true'});
       return new Response(bytes, {headers:{'Content-Type':'application/vnd.openxmlformats-officedocument.presentationml.presentation','Content-Disposition':`attachment; filename="${code}_ficha_HERCAS.pptx"`,'Cache-Control':'private, no-store'}});
     } catch {return new Response('No se pudo generar la ficha', {status:503});}
   }
