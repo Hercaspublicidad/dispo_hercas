@@ -86,3 +86,11 @@ Los objetos PNG/JPG originales se conservan en Storage como respaldo, fuera de l
 ## Paginación del catálogo
 
 La cuadrícula muestra 50 fichas por página de forma predeterminada y permite elegir 30. Incluye anterior, siguiente, salto directo de página y el rango visible sobre el total filtrado, tanto arriba como abajo. Con 587 resultados y 50 por página hay 12 páginas: 11 de 50 y una de 37. La búsqueda y los filtros se aplican a todos los registros antes de paginar y vuelven a la primera página. La selección se conserva entre páginas; «Seleccionar todas las filtradas» mantiene su alcance sobre todos los resultados del filtro. El mapa sigue mostrando todos los resultados filtrados. Solo se montan las tarjetas de la página actual y sus imágenes siguen usando miniaturas WebP y carga diferida.
+
+## Carga de imágenes al cambiar de página
+
+La primera página del catálogo incluye enlaces privados de sus miniaturas desde el renderizado inicial. Al navegar se preparan los enlaces de la página en un lote mediante `/api/thumbnails`, en lugar de consultar la API completa de cada foto individualmente. El listado de admin también usa lotes. Se priorizan las primeras seis imágenes visibles; las demás conservan carga diferida. Se precargan hasta seis miniaturas de la página siguiente con prioridad baja y se reutilizan los enlaces y las imágenes ya descargadas durante la sesión.
+
+La imagen reserva su espacio y muestra «Cargando foto…» hasta estar disponible. Si falla un enlace temporal, intenta la API privada de miniaturas y luego la foto completa; si todo falla se indica «Foto no disponible». Las imágenes ya descargadas se muestran sin ocultarlas durante la hidratación. Se respeta la preferencia de movimiento reducido para el indicador animado.
+
+Los enlaces de Storage duran diez minutos; la caché del navegador se renueva antes de su vencimiento. El endpoint valida sesión, permisos, origen y códigos (máximo 50), y excluye vallas archivadas salvo para administradores. Las respuestas con enlaces son privadas y no se guardan en cachés compartidas. Las miniaturas siguen estando en un bucket privado.
