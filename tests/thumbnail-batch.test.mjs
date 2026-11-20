@@ -9,13 +9,13 @@ const records=Array.from({length:100},(_,index)=>record(index+1));
 function client({archived=false}={}) {
   const calls=[];
   const rows=[{codigo:records[0].codigo,datos_fuente:{}},{codigo:records[1].codigo,datos_fuente:{archivado_en:archived?'2026-11-20':null}}];
-  const files=[{codigo:records[0].codigo,sha256:'b'.repeat(64),ruta:'old.png',subido_en:'2026-10-01'},{codigo:records[0].codigo,sha256:'a'.repeat(64),ruta:'new.webp',subido_en:'2026-11-20'},{codigo:records[1].codigo,sha256:'c'.repeat(64),ruta:'two.webp',subido_en:'2026-11-20'}];
+  const files=[{codigo:records[0].codigo,sha256:'b'.repeat(64),ruta:'old.png',subido_en:'2026-10-01'},{codigo:records[0].codigo,sha256:'a'.repeat(64),ruta:'new.webp',subido_en:'2026-11-20'},{codigo:records[1].codigo,sha256:'c'.repeat(64),ruta:'two.webp',subido_en:'2026-11-20'},{codigo:records[2].codigo,sha256:'d'.repeat(64),ruta:'hidden.webp',subido_en:'2026-11-20'}];
   return {calls,from(table){let codes=[];return {select(){return this;},eq(){return this;},order(){return this;},in(_key,value){codes=value;return this;},range:async()=>({data:files.filter(row=>codes.includes(row.codigo)),error:null}),then(resolve,reject){return Promise.resolve({data:rows.filter(row=>codes.includes(row.codigo)),error:null}).then(resolve,reject);}};},storage:{from(bucket){assert.equal(bucket,'aliados-vallas');return {createSignedUrls:async(paths,ttl)=>{calls.push(paths);assert.equal(ttl,600);return {data:paths.map(path=>({path,signedUrl:'https://storage.invalid/'+path})),error:null};}};}}};
 }
 
 test('un lote firma solo la foto actual de vallas autorizadas; no revela las archivadas',async()=>{
   const api=client({archived:true});
-  const result=await signThumbnailBatch(api,records.slice(0,2).map(row=>row.codigo));
+  const result=await signThumbnailBatch(api,records.slice(0,3).map(row=>row.codigo));
   assert.equal(api.calls.length,1);assert.equal(api.calls[0].length,1);assert.equal(result.images.length,1);assert.equal(result.images[0].version,'a'.repeat(64));
   assert.ok(result.images[0].url.includes('/card.webp'));
   const admin=client({archived:true});
@@ -33,10 +33,11 @@ test('50 miniaturas usan una llamada y reutilizan caché y precarga de página s
   }});
   assert.equal(Object.keys(await loader.load(records.slice(0,50))).length,50);assert.equal(calls.length,1);
   await loader.load(records.slice(0,50));assert.equal(calls.length,1);
-  await loader.load(records.slice(50,56));
-  await loader.load(records.slice(50));assert.deepEqual(calls.map(codes=>codes.length),[50,6,44]);
-  time=541000;await loader.load(records.slice(0,50));assert.equal(calls.length,4);
-  await loader.load([{...records[0],fotoVersion:'b'.repeat(64)}]);assert.equal(calls.length,5);
+  await loader.load(records.slice(50)); // Full next page prepared before navigation.
+  await loader.load(records.slice(50));assert.deepEqual(calls.map(codes=>codes.length),[50,50]);
+  await loader.load(records.slice(0,50));assert.equal(calls.length,2); // Back also reuses the URL.
+  time=541000;await loader.load(records.slice(0,50));assert.equal(calls.length,3);
+  await loader.load([{...records[0],fotoVersion:'b'.repeat(64)}]);assert.equal(calls.length,4);
 });
 
 test('una precarga todavía en curso se comparte y la página inicial ya llega preparada',async()=>{

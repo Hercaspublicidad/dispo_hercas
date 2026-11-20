@@ -8,6 +8,9 @@ function safeNext(value) {
 }
 
 export async function middleware(request) {
+  // This route validates its own session, catalog permissions and origin.
+  // Avoid doing the same remote authorization queries twice per image batch.
+  if(request.nextUrl.pathname==='/api/thumbnails')return NextResponse.next({request});
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) return new Response('Falta configurar Supabase.', { status: 503 });
