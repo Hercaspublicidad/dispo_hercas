@@ -9,7 +9,7 @@ assert.match(html, /Bienvenido a Hercas/);
 const page = await fetch(base, { redirect: 'manual' });
 assert.equal(page.status, 307, 'catalog page must redirect without a session');
 assert.match(page.headers.get('location') ?? '', /\/login\?next=/);
-for (const route of ['/api/catalog', '/api/asset/MV-BAQ-001/ficha', '/api/admin/transfer']) {
+for (const route of ['/api/catalog', '/api/asset/MV-BAQ-001/ficha', '/api/asset/MV-BAQ-001/miniatura?size=card', '/api/admin/transfer']) {
   const response = await fetch(`${base}${route}`);
   assert.equal(response.status, 401, `${route} must reject anonymous access`);
 }

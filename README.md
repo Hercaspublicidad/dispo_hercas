@@ -68,3 +68,11 @@ La exportación prepara enlaces privados por paquete y descarga hasta cuatro im�
 ## Estrato, iluminación y flujo
 
 Cada valla admite `estrato` (número no negativo), `iluminacion` (texto de hasta 150 caracteres) y `flujo_personas_vehiculos` (un valor numérico no negativo para el flujo de personas / vehículos). Son opcionales; un número vacío se guarda como nulo, y cero se conserva como dato válido. No se presupone una unidad de tiempo para el flujo. Se guardan en `datos_fuente` mediante la transacción administrativa existente, sin migración SQL. Aparecen en el editor de administración, el detalle del catálogo y las fichas y propuestas PowerPoint cuando están informados. Las exportaciones CSV y ZIP y la plantilla masiva incluyen las tres columnas. Los archivos antiguos que omiten esas columnas conservan los valores existentes; una celda vacía en una columna presente los limpia.
+
+## Miniaturas del catálogo
+
+Las tarjetas usan WebP de hasta 640 × 360 y el listado de administración usa WebP de hasta 160 × 100, con carga diferida y decodificación asíncrona. El detalle, la edición y las presentaciones continúan usando la foto de mayor resolución. Las miniaturas se guardan en el bucket privado `aliados-vallas` bajo `<codigo>/miniaturas/v1/<sha256>/`, sin crear registros de foto ni incluir copias adicionales en las exportaciones ZIP.
+
+Las cargas de fotos desde admin y la importación masiva preparan ambos tamaños. Si una foto antigua todavía no tiene miniatura, la API la genera y guarda al solicitarla. Los accesos posteriores reutilizan ese archivo. La generación se comparte entre solicitudes simultáneas en la misma instancia. Al cambiar la foto cambia la ruta de las miniaturas. El navegador conserva los bytes con ETag y revalida el acceso; las respuestas son privadas y la API aplica los mismos controles de permisos y archivado que las fotos originales. Si la miniatura falla, la interfaz puede mostrar la foto original como respaldo.
+
+Para preparar las miniaturas existentes sin esperar a su primera visita: `node --env-file=.env.local scripts/prepare_catalog_thumbnails.mjs --concurrency 4`. Se puede limitar con `--limit 20` o seleccionar una valla con `--code TEST-CAL-001`. El proceso es reanudable y no modifica ni elimina originales. No requiere transformaciones pagadas de Supabase ni migración SQL.
