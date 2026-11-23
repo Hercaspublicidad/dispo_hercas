@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import JSZip from 'jszip';
+import {readFile} from 'node:fs/promises';
 import { buildProposal, buildIndividualFiche } from '../lib/proposal-cloud.mjs';
 
 test('PowerPoint masivo incluye portada, separadores y precio editable', async () => {
@@ -15,7 +16,16 @@ test('PowerPoint masivo incluye portada, separadores y precio editable', async (
   const slides = Object.keys(zip.files).filter(name => /^ppt\/slides\/slide\d+\.xml$/.test(name)).sort();
   assert.equal(slides.length, 5);
   const xml = (await Promise.all(slides.map(name => zip.file(name).async('string')))).join('\n');
-  for (const text of ['VALLAS', 'DISPONIBLES', 'BARRANQUILLA', 'BOGOTÁ', 'MV-BAQ-001']) assert.ok(xml.includes(text), text);
+  for (const text of ['BARRANQUILLA', 'BOGOTÁ', 'MV-BAQ-001']) assert.ok(xml.includes(text), text);
+  const cover=await zip.file('ppt/slides/slide1.xml').async('string');
+  assert.equal((cover.match(/<p:pic>/g)||[]).length,1);
+  assert.ok(!cover.includes('<a:t>'),'la portada oficial no lleva textos superpuestos');
+  assert.ok(cover.includes('<a:off x="0" y="0"/>')&&cover.includes('<a:ext cx="12192000" cy="6858000"/>'),'la imagen ocupa toda la diapositiva 16:9');
+  const relation=await zip.file('ppt/slides/_rels/slide1.xml.rels').async('string');
+  const imageTarget=relation.match(/Target="\.\.\/media\/([^"]+)"[^>]*Type="[^"]*\/image"/)?.[1]
+    || relation.match(/Type="[^"]*\/image"[^>]*Target="\.\.\/media\/([^"]+)"/)?.[1];
+  assert.ok(imageTarget,'la portada tiene una imagen incrustada');
+  assert.deepEqual(await zip.file(`ppt/media/${imageTarget}`).async('nodebuffer'),await readFile(new URL('../public/presentations/portada-hercas.png',import.meta.url)),'se conserva exactamente la imagen entregada');
   assert.ok(!xml.includes('SIMULACIÓN DE PAUTA HERCAS'));
   assert.ok(xml.includes('<a:t>9.700.000</a:t>'), 'el precio debe ser texto editable');
 });
