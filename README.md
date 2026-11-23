@@ -91,6 +91,10 @@ La cuadrícula muestra 50 fichas por página de forma predeterminada y permite e
 
 Las propuestas PowerPoint comienzan siempre con la imagen oficial `public/presentations/portada-hercas.png` y terminan con `public/presentations/cierre-hercas.png`. Ambas se incrustan sin recomprimir ni recortar y sin textos superpuestos, a pantalla completa en formato 16:9. Entre ellas siguen los separadores por ciudad y las fichas con datos actuales. El total de diapositivas es 2 + ciudades + vallas. Las fichas individuales siguen teniendo una sola diapositiva. Las dos imágenes se incluyen explícitamente en el despliegue del endpoint `/api/proposal`.
 
+## Separadores por ciudad
+
+Los separadores mantienen la agrupación por ciudad. Siguen la referencia de zona: foto de la primera valla del grupo a pantalla completa, velo azul degradado, silueta central oscura, símbolo amarillo y títulos Montserrat («ZONA» delineado y ciudad en blanco). Los títulos son editables y el tamaño del nombre se ajusta a ciudades largas. El velo y símbolo se incrustan como PNG para conservar su aspecto en PowerPoint sin depender del soporte SVG.
+
 ## Carga de imágenes al cambiar de página
 
 La primera página del catálogo incluye enlaces privados de sus miniaturas desde el renderizado inicial. Al navegar se preparan los enlaces de la página en un lote mediante `/api/thumbnails`, en lugar de consultar la API completa de cada foto individualmente. El listado de admin también usa lotes. Se priorizan las primeras seis imágenes visibles; las demás conservan carga diferida. Se preparan los enlaces de toda la página siguiente en un lote y se precargan todas sus miniaturas en segundo plano, con prioridad baja y un máximo de cuatro descargas simultáneas. La caché de la vista conserva hasta cien imágenes precargadas, además de la caché HTTP del navegador, y reutiliza los mismos enlaces durante su vigencia. Al navegar o filtrar se descarta la cola pendiente anterior para dar prioridad a los próximos resultados; los errores no se guardan como imágenes válidas. Las imágenes de la página actual mantienen la carga diferida.
