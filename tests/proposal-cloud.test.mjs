@@ -42,6 +42,7 @@ test('PowerPoint masivo incluye portada, separadores y precio editable', async (
   assert.ok(zone.includes('<a:ln w="21590">'),'ZONA conserva su contorno');
   assert.equal((zone.match(/<p:pic>/g)||[]).length,2,'foto y velo azul con símbolo, compatibles sin SVG');
   assert.ok(!xml.includes('SIMULACIÓN DE PAUTA HERCAS'));
+  assert.ok(!xml.includes('Sentido:')&&!xml.includes('Estructura:'),'los campos vacíos no generan etiquetas sin datos');
   assert.ok(xml.includes('<a:t>9.700.000</a:t>'), 'el precio debe ser texto editable');
 });
 
