@@ -85,6 +85,10 @@ Los objetos PNG/JPG originales se conservan en Storage como respaldo, fuera de l
 
 ## Paginación del catálogo
 
+Cada tarjeta muestra características (tamaño, iluminación, estrato, sentido y estructura), destacados y un estado público: DISPONIBLE, OCUPADA o POR CONFIRMAR. Los estados y el filtro comparten la misma regla de vigencia de ocho días; las fuentes en revisión, duplicadas o sin confirmación vigente se muestran por confirmar. «No disponible», ocupada, reservada y vendida vigentes se presentan como OCUPADA. Los estados internos de revisión conservan su función administrativa.
+
+Los destacados se editan desde administración, uno por línea (hasta diez de cien caracteres). No se completan automáticamente las cercanías. Se guardan en `datos_fuente.destacados`, se muestran también en la hoja de vida y viajan en la columna `destacados` del CSV y en los ZIP. Las importaciones antiguas sin esa columna conservan los valores actuales; una celda vacía los borra. Las actualizaciones masivas siguen requiriendo revisión.
+
 La cuadrícula muestra 50 fichas por página de forma predeterminada y permite elegir 30. Incluye anterior, siguiente, salto directo de página y el rango visible sobre el total filtrado, tanto arriba como abajo. Con 587 resultados y 50 por página hay 12 páginas: 11 de 50 y una de 37. La búsqueda y los filtros se aplican a todos los registros antes de paginar y vuelven a la primera página. La selección se conserva entre páginas; «Seleccionar todas las filtradas» mantiene su alcance sobre todos los resultados del filtro. El mapa sigue mostrando todos los resultados filtrados. Solo se montan las tarjetas de la página actual y sus imágenes siguen usando miniaturas WebP y carga diferida.
 
 ## Portada de las presentaciones

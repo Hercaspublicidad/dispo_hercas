@@ -1,5 +1,6 @@
 'use client';
 import BrandLogo from '../ui/BrandLogo';
+import {highlightItems} from '../../lib/valla-highlights.mjs';
 import VallaThumbnail from '../ui/VallaThumbnail';
 import usePageThumbnails from '../ui/usePageThumbnails';
 import AdminTransfer from './AdminTransfer';
@@ -9,7 +10,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {PHOTO_LIMIT} from '../../lib/valla-admin.mjs';
 import {mediaKind} from '../../lib/media-kind.mjs';
 
-const blank = {codigo:'',proveedor:'',ciudad:'',ubicacion:'',formato:'',categoria:'',medidas:'',tarifa_mensual_cop:'',latitud:'',longitud:'',estado:'revision_fuente',entorno:'exterior',tipo_soporte:'estatica',estrato:'',iluminacion:'',sentido:'',estructura:'',flujo_personas_vehiculos:'',codigo_proveedor:'',observacion_calidad:'',condiciones_comerciales:''};
+const blank = {codigo:'',proveedor:'',ciudad:'',ubicacion:'',formato:'',categoria:'',medidas:'',tarifa_mensual_cop:'',latitud:'',longitud:'',estado:'revision_fuente',entorno:'exterior',tipo_soporte:'estatica',estrato:'',iluminacion:'',sentido:'',estructura:'',destacados:'',flujo_personas_vehiculos:'',codigo_proveedor:'',observacion_calidad:'',condiciones_comerciales:''};
 const money = value => value == null || value === '' ? 'Por confirmar' : '$ ' + new Intl.NumberFormat('es-CO').format(value);
 const status = value => ({completo:'Completo',revision_fuente:'Revisar fuente',duplicado_confirmado:'Duplicado'}[value]);
 const fields = [
@@ -25,7 +26,7 @@ const fields = [
 ];
 const toForm = row => {
   const kind = mediaKind({categoria:row.categoria,formato:row.formato,entorno:row.datos_fuente?.entorno,tipoSoporte:row.datos_fuente?.tipo_soporte});
-  return {...blank,...Object.fromEntries(Object.keys(blank).map(key=>[key,row[key] ?? row.datos_fuente?.[key] ?? blank[key]])),entorno:kind.entorno,tipo_soporte:kind.soporte,actualizado_en:row.actualizado_en};
+  return {...blank,...Object.fromEntries(Object.keys(blank).map(key=>[key,row[key] ?? row.datos_fuente?.[key] ?? blank[key]])),entorno:kind.entorno,tipo_soporte:kind.soporte,actualizado_en:row.actualizado_en,destacados:highlightItems(row.datos_fuente?.destacados).join('\n')};
 };
 
 async function responseJson(response) {
@@ -134,6 +135,7 @@ export default function AdminVallas() {
         <label className="admin-photo-label">{image?'Cambiar foto':'Seleccionar foto'}<input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={choosePhoto}/></label><p className="admin-hint">JPG, PNG o WebP · hasta 4 MB. La foto se guardará en WebP.</p>{photo&&<button type="button" className="secondary" onClick={()=>{setPhoto(null);if(fileInput.current)fileInput.current.value='';}}>Quitar foto seleccionada</button>}
         <div className="admin-help"><strong>Así se actualizan las presentaciones</strong><p>Al guardar, las nuevas propuestas y la ficha individual usarán la información y la foto actual. Los archivos descargados anteriormente conservan su contenido.</p>{selected?.foto&&<a className="secondary" target="_blank" rel="noreferrer" href={`/api/asset/${selected.codigo}/ficha`}>Descargar ficha actual sin precio</a>}</div>
       </div><div><h3>Datos comerciales</h3><div className="admin-fields">{fields.map(([key,label,type,required,maxLength])=><label key={key} className={key==='ubicacion'?'admin-wide':''}>{label}{required?' *':''}<input name={key} type={type} required={required} maxLength={maxLength} value={form[key]} readOnly={key==='codigo'&&!!editing} onChange={e=>change(key,e.target.value)} step={type==='number'?'any':undefined} min={['estrato','flujo_personas_vehiculos','tarifa_mensual_cop'].includes(key)?0:key==='latitud'?-90:key==='longitud'?-180:undefined} max={key==='tarifa_mensual_cop'?1e12:key==='latitud'?90:key==='longitud'?180:undefined} placeholder={key==='codigo'?'MV-BAQ-001':undefined}/></label>)}
+        <label className="admin-wide">Destacados de la valla<textarea name="destacados" rows={4} maxLength={2000} value={form.destacados} placeholder={'Cerca de universidades\nCerca de centros comerciales\nZona de restaurantes'} aria-describedby="destacados-help" onChange={e=>change('destacados',e.target.value)}/><span id="destacados-help">Un destacado por línea. Hasta 10, de 100 caracteres cada uno. Registra solo cercanías confirmadas.</span></label>
         <label>Estado de revisión<select value={form.estado} onChange={e=>change('estado',e.target.value)}><option value="revision_fuente">Revisar fuente</option><option value="completo">Completo</option><option value="duplicado_confirmado">Duplicado confirmado</option></select></label>
         <label>Entorno<select value={form.entorno} onChange={e=>change('entorno',e.target.value)}><option value="">Por confirmar</option><option value="exterior">Vía pública</option><option value="aeropuerto">Aeropuerto</option><option value="centro_comercial">Centro comercial</option></select></label>
         <label>Tipo de soporte<select value={form.tipo_soporte} onChange={e=>change('tipo_soporte',e.target.value)}><option value="">Por confirmar</option><option value="estatica">Valla estática</option><option value="led">Pantalla LED</option></select></label>
