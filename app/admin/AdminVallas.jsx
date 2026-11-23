@@ -1,4 +1,5 @@
 'use client';
+import BrandLogo from '../ui/BrandLogo';
 import VallaThumbnail from '../ui/VallaThumbnail';
 import usePageThumbnails from '../ui/usePageThumbnails';
 import AdminTransfer from './AdminTransfer';
@@ -113,7 +114,7 @@ export default function AdminVallas() {
   };
   const image = preview || (selected?.foto ? `/api/asset/${selected.codigo}/foto?v=${encodeURIComponent(selected.foto_version || '')}` : '');
   return <div className="shell admin-shell">
-    <aside className="sidebar"><div className="brand"><div className="brand-mark">H</div><div><strong>HERCAS</strong><small>MEDIOS EXTERIORES</small></div></div><div className="nav-label">ESPACIO DE TRABAJO</div><a className="nav" href="/">▦ <span>Explorar medios</span></a><a className="nav active" href="/admin" aria-current="page">⚙ <span>Administrar vallas</span></a><div className="side-bottom">Administrador de plataforma<br/><small>Gestión de inventario y fotografías</small></div></aside>
+    <aside className="sidebar"><div className="brand"><BrandLogo/></div><div className="nav-label">ESPACIO DE TRABAJO</div><a className="nav" href="/">▦ <span>Explorar medios</span></a><a className="nav active" href="/admin" aria-current="page">⚙ <span>Administrar vallas</span></a><div className="side-bottom">Administrador de plataforma<br/><small>Gestión de inventario y fotografías</small></div></aside>
     <main className="main admin-main">
       <header className="top"><div><div className="eyebrow">ADMINISTRACIÓN</div><h1>Gestión de vallas</h1><p>Actualiza la información y las fotos que tu equipo utiliza en sus propuestas.</p></div><button className="primary" onClick={()=>open(null)}>+ Crear valla</button></header>
       <section className="admin-metrics" aria-label="Resumen del inventario"><div><strong>{rows.filter(r=>!r.datos_fuente?.archivado_en).length}</strong><span>En inventario</span></div><div><strong>{rows.filter(r=>!r.datos_fuente?.archivado_en&&r.foto).length}</strong><span>Con fotografía</span></div><div><strong>{rows.filter(r=>!r.datos_fuente?.archivado_en&&!r.foto).length}</strong><span>Sin fotografía</span></div></section>

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import JSZip from 'jszip';
+import {readFile} from 'node:fs/promises';
 import {validateValla} from '../lib/valla-admin.mjs';
 import {prepareVallaPhoto} from '../lib/valla-photo.mjs';
 import {hasCatalogAdminRole} from '../lib/catalog-permission.mjs';
@@ -39,10 +40,13 @@ test('estrato, iluminación y flujo se validan, conservan y muestran sin perder 
 });
 
 test('los nuevos datos aparecen en las fichas y propuestas incluso sin precio',async()=>{
+  const logo=await readFile(new URL('../public/brand/hercas-logo.png',import.meta.url));
   const photo=await sharp({create:{width:160,height:90,channels:3,background:'#abcde0'}}).webp().toBuffer();
   const record={codigo:input.codigo,ciudad:'Bogotá',proveedor:'Aliado',foto:true,ficha:true,estrato:3,iluminacion:'LED nocturna',sentido:'Norte a sur',estructura:'Tubular metálica',flujo_personas_vehiculos:12500,tarifa:9999999};
   for(const bytes of [await buildIndividualFiche(record,photo),await buildProposal([record],async()=>photo)]) {
     const zip=await JSZip.loadAsync(bytes);
+    const media=await Promise.all(Object.keys(zip.files).filter(name=>/^ppt\/media\/.*\.png$/.test(name)).map(name=>zip.file(name).async('nodebuffer')));
+    assert.ok(media.some(image=>image.equals(logo)),'la ficha incluye el logo oficial incrustado');
     const xml=(await Promise.all(Object.keys(zip.files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name)).map(name=>zip.file(name).async('string')))).join('');
     for(const text of ['Estrato: 3','Iluminación: LED nocturna','Flujo personas / vehículos: 12.500','Sentido: Norte a sur','Estructura: Tubular metálica'])assert.ok(xml.includes(text),text);
     assert.ok(!xml.includes('9.999.999'));

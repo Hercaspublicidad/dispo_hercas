@@ -1,4 +1,5 @@
 'use client';
+import BrandLogo from './BrandLogo';
 import VallaThumbnail from './VallaThumbnail';
 import CatalogPagination from './CatalogPagination';
 import usePageThumbnails from './usePageThumbnails';
@@ -131,7 +132,7 @@ export default function CatalogClient({ initial, canManage = false, isAdmin = fa
     window.location.replace('/login');
   };
   return <div className="shell">
-    <aside className="sidebar"><div className="brand"><div className="brand-mark">H</div><div><strong>HERCAS</strong><small>MEDIOS EXTERIORES</small></div></div><div className="nav-label">ESPACIO DE TRABAJO</div><button className={'nav '+(tab==='catalogo'?'active':'')} onClick={()=>setTab('catalogo')}>▦ <span>Explorar medios</span></button>{canManage&&<button className={'nav '+(tab==='actualizar'?'active':'')} onClick={()=>setTab('actualizar')}>↻ <span>Actualizar catálogo</span></button>}{isAdmin&&<a className="nav" href="/admin" aria-label="Administrar vallas">⚙ <span>Administrar vallas</span></a>}<div className="side-bottom"><button className="sign-out" onClick={signOut}>Cerrar sesión</button><span className="live-dot" /> Catálogo HERCAS · 2026<br/><small>Información centralizada</small></div></aside>
+    <aside className="sidebar"><div className="brand"><BrandLogo/></div><div className="nav-label">ESPACIO DE TRABAJO</div><button className={'nav '+(tab==='catalogo'?'active':'')} onClick={()=>setTab('catalogo')}>▦ <span>Explorar medios</span></button>{canManage&&<button className={'nav '+(tab==='actualizar'?'active':'')} onClick={()=>setTab('actualizar')}>↻ <span>Actualizar catálogo</span></button>}{isAdmin&&<a className="nav" href="/admin" aria-label="Administrar vallas">⚙ <span>Administrar vallas</span></a>}<div className="side-bottom"><button className="sign-out" onClick={signOut}>Cerrar sesión</button><span className="live-dot" /> Catálogo HERCAS · 2026<br/><small>Información centralizada</small></div></aside>
     <main className="main">
       <header className="top"><div><div className="eyebrow">CATÁLOGO COMERCIAL</div><h1>{tab==='catalogo'?'Encuentra el medio indicado':'Actualización de aliados'}</h1><p>{tab==='catalogo'?'Busca por ciudad, dirección o código y abre la ficha lista para propuesta.':'Carga el archivo semanal y revisa las coincidencias antes de cambiar disponibilidades.'}</p></div><div className="top-chip">HERCAS · Inventario de aliados</div></header>
       {tab==='catalogo' ? <>

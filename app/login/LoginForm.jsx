@@ -1,4 +1,5 @@
 'use client';
+import BrandLogo from '../ui/BrandLogo';
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -52,6 +53,7 @@ export default function LoginForm() {
 
   return <section className="auth-shell">
     <div className="auth-story">
+      <BrandLogo/>
       <span className="auth-eyebrow">HERCAS · CENTRO COMERCIAL DIGITAL</span>
       <h1>Tu equipo. Un solo lugar.</h1>
       <p>Conecta tus oportunidades, tu equipo y los espacios que hacen visible cada marca.</p>
