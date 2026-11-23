@@ -91,6 +91,10 @@ La cuadrícula muestra 50 fichas por página de forma predeterminada y permite e
 
 Las propuestas PowerPoint comienzan siempre con la imagen oficial `public/presentations/portada-hercas.png` y terminan con `public/presentations/cierre-hercas.png`. Ambas se incrustan sin recomprimir ni recortar y sin textos superpuestos, a pantalla completa en formato 16:9. Entre ellas siguen los separadores por ciudad y las fichas con datos actuales. El total de diapositivas es 2 + ciudades + vallas. Las fichas individuales siguen teniendo una sola diapositiva. Las dos imágenes se incluyen explícitamente en el despliegue del endpoint `/api/proposal`.
 
+## Diseño de las fichas
+
+Las fichas de valla siguen la referencia comercial: cabecera con código y ciudad, fotografía grande a la izquierda fundida con el fondo azul, flujo e información de la valla a la derecha y franja inferior con estrato, iluminación, tamaño y logo oficial. Sentido y estructura aparecen cuando están completos. El precio y las condiciones comerciales siguen ocultos por defecto y solo se incluyen al marcar la opción de precios. Se usa la ciudad como zona; el flujo conserva su etiqueta genérica porque todavía no se registra su unidad ni periodo. Las fotos se descargan sin el recorte panorámico previo y se ajustan por separado a ficha y separador.
+
 ## Separadores por ciudad
 
 Los separadores mantienen la agrupación por ciudad. Siguen la referencia de zona: foto de la primera valla del grupo a pantalla completa, velo azul degradado, silueta central oscura, símbolo amarillo y títulos Montserrat («ZONA» delineado y ciudad en blanco). Los títulos son editables y el tamaño del nombre se ajusta a ciudades largas. El velo y símbolo se incrustan como PNG para conservar su aspecto en PowerPoint sin depender del soporte SVG.

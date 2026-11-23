@@ -43,6 +43,7 @@ test('PowerPoint masivo incluye portada, separadores y precio editable', async (
   assert.equal((zone.match(/<p:pic>/g)||[]).length,2,'foto y velo azul con símbolo, compatibles sin SVG');
   assert.ok(!xml.includes('SIMULACIÓN DE PAUTA HERCAS'));
   assert.ok(!xml.includes('Sentido:')&&!xml.includes('Estructura:'),'los campos vacíos no generan etiquetas sin datos');
+  assert.ok(!xml.includes('aprox. / día')&&!xml.includes('Desde'),'no inventa unidades de flujo ni precios mínimos');
   assert.ok(xml.includes('<a:t>9.700.000</a:t>'), 'el precio debe ser texto editable');
 });
 
@@ -56,7 +57,7 @@ test('fichas y propuestas omiten precios y condiciones comerciales salvo selecci
       const slides = Object.keys(zip.files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name));
       const xml = (await Promise.all(slides.map(name=>zip.file(name).async('string')))).join('');
       assert.equal(xml.includes('9.876.543'), includePrices === true);
-      assert.equal(xml.includes('TARIFA MENSUAL'), includePrices === true);
+      assert.equal(xml.includes('Arrendamiento / mes'), includePrices === true);
       assert.equal(xml.includes('Costo adicional 12345 COP'), includePrices === true);
       assert.ok(xml.includes('TEST-CAL-001'));
     }

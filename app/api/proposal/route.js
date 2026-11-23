@@ -40,8 +40,7 @@ export async function POST(request) {
     const getPhoto = async code => {
       const storage = client.storage.from('aliados-vallas');
       const path = photoByCode.get(code).ruta;
-      let response = await storage.download(path, {transform:{width:1280,height:720,resize:'cover',quality:60}});
-      if (response.error) response = await storage.download(path);
+      const response = await storage.download(path);
       if (response.error || !response.data) throw new Error(`No se pudo abrir la foto de ${code}`);
       return Buffer.from(await response.data.arrayBuffer());
     };
