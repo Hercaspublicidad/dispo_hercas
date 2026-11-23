@@ -8,7 +8,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {PHOTO_LIMIT} from '../../lib/valla-admin.mjs';
 import {mediaKind} from '../../lib/media-kind.mjs';
 
-const blank = {codigo:'',proveedor:'',ciudad:'',ubicacion:'',formato:'',categoria:'',medidas:'',tarifa_mensual_cop:'',latitud:'',longitud:'',estado:'revision_fuente',entorno:'exterior',tipo_soporte:'estatica',estrato:'',iluminacion:'',flujo_personas_vehiculos:'',codigo_proveedor:'',observacion_calidad:'',condiciones_comerciales:''};
+const blank = {codigo:'',proveedor:'',ciudad:'',ubicacion:'',formato:'',categoria:'',medidas:'',tarifa_mensual_cop:'',latitud:'',longitud:'',estado:'revision_fuente',entorno:'exterior',tipo_soporte:'estatica',estrato:'',iluminacion:'',sentido:'',estructura:'',flujo_personas_vehiculos:'',codigo_proveedor:'',observacion_calidad:'',condiciones_comerciales:''};
 const money = value => value == null || value === '' ? 'Por confirmar' : '$ ' + new Intl.NumberFormat('es-CO').format(value);
 const status = value => ({completo:'Completo',revision_fuente:'Revisar fuente',duplicado_confirmado:'Duplicado'}[value]);
 const fields = [
@@ -17,6 +17,7 @@ const fields = [
   ['ubicacion','Dirección / ubicación','text',true,600],['formato','Formato','text',false,150],
   ['categoria','Categoría','text',false,150],['medidas','Medidas','text',false,150],
   ['estrato','Estrato','number'],['iluminacion','Iluminación','text',false,150],
+  ['sentido','Sentido','text',false,150],['estructura','Estructura','text',false,150],
   ['flujo_personas_vehiculos','Flujo de personas / vehículos','number'],
   ['tarifa_mensual_cop','Tarifa mensual de referencia (COP)','number'],
   ['latitud','Latitud','number'],['longitud','Longitud','number'],

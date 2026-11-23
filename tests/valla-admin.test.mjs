@@ -10,6 +10,17 @@ import {buildIndividualFiche,buildProposal} from '../lib/proposal-cloud.mjs';
 
 const input = {codigo:'TEST-BOG-001',proveedor:'Aliado',ciudad:'Bogotá',ubicacion:'Carrera 7',estado:'revision_fuente',tarifa_mensual_cop:'1250000',latitud:'',longitud:'',entorno:'exterior',tipo_soporte:'estatica'};
 
+test('sentido y estructura son textos opcionales que se guardan, conservan y muestran en la hoja de vida',()=>{
+  const saved=validateValla({...input,sentido:' Norte a sur ',estructura:' Tubular metalica '});
+  assert.equal(saved.datos_fuente.sentido,'Norte a sur');assert.equal(saved.datos_fuente.estructura,'Tubular metalica');
+  const edited=validateValla(input,saved);
+  const record=mapRemoteCatalog([edited],[],[],[]).records[0];
+  assert.equal(record.sentido,'Norte a sur');assert.equal(record.estructura,'Tubular metalica');
+  const cleared=validateValla({...input,sentido:'',estructura:''},saved);
+  assert.equal(cleared.datos_fuente.sentido,'');assert.equal(cleared.datos_fuente.estructura,'');
+  for(const key of ['sentido','estructura'])for(const value of [7,true,{},'x'.repeat(151)])assert.throws(()=>validateValla({...input,[key]:value}));
+});
+
 test('estrato, iluminación y flujo se validan, conservan y muestran sin perder ceros',()=>{
   const saved=validateValla({...input,estrato:'3',iluminacion:' LED nocturna ',flujo_personas_vehiculos:'12500'});
   assert.equal(saved.datos_fuente.estrato,3);

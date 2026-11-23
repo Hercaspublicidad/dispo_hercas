@@ -6,6 +6,19 @@ import {buildTransferArchive,readTransferArchive,readZipEntry} from '../lib/vall
 
 const row={codigo:'TEST-CAL-001',proveedor:'Aliado',ciudad:'Cali',ubicacion:'Carrera 7; esquina "azul"\nPiso 2',estado:'completo',tarifa_mensual_cop:2500000,latitud:-3.4,longitud:-76.5,datos_fuente:{codigo_proveedor:'EXT-201',archivo_fuente_nombre:'original.pptx',entorno:'exterior',tipo_soporte:'estatica'},actualizado_en:'2026-10-29T15:00:00Z'};
 
+test('CSV conserva sentido y estructura al exportar e importar, y admite archivos anteriores',()=>{
+  const previous={...row,datos_fuente:{...row.datos_fuente,sentido:'Sur a norte',estructura:'Metalica; "doble"'}};
+  const exported=validateTransferInput({codigo:row.codigo},previous);
+  const imported=validateTransferInput(decodeTransferCsv(encodeTransferCsv([{...exported,...exported.datos_fuente}]))[0]);
+  assert.equal(imported.datos_fuente.sentido,previous.datos_fuente.sentido);
+  assert.equal(imported.datos_fuente.estructura,previous.datos_fuente.estructura);
+  const legacy=validateTransferInput({codigo:row.codigo,ciudad:'Bogotá'},previous);
+  assert.equal(legacy.datos_fuente.sentido,previous.datos_fuente.sentido);
+  assert.equal(legacy.datos_fuente.estructura,previous.datos_fuente.estructura);
+  const cleared=validateTransferInput({codigo:row.codigo,sentido:'',estructura:''},previous);
+  assert.equal(cleared.datos_fuente.sentido,'');assert.equal(cleared.datos_fuente.estructura,'');
+});
+
 test('CSV exporta e importa los nuevos campos y los archivos antiguos no los borran',()=>{
   const previous={...row,datos_fuente:{...row.datos_fuente,estrato:4,iluminacion:'Sin iluminación',flujo_personas_vehiculos:0}};
   const snapshot=validateTransferInput({codigo:row.codigo},previous);
