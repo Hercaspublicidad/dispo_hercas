@@ -52,7 +52,7 @@ export async function POST(request) {
     await uploadProposal({admin,path,output});
     const signed = await client.storage.from('aliados-catalogos').createSignedUrl(path,600,{download:filename});
     if (signed.error || !signed.data?.signedUrl) throw signed.error || new Error('No se pudo crear enlace');
-    return Response.json({url:signed.data.signedUrl, slides:1+new Set(selected.map(r=>r.ciudad)).size+selected.length, bytes:output.length}, {headers:{'Cache-Control':'no-store'}});
+    return Response.json({url:signed.data.signedUrl, slides:2+new Set(selected.map(r=>r.ciudad)).size+selected.length, bytes:output.length}, {headers:{'Cache-Control':'no-store'}});
   } catch (error) {
     return Response.json({error:error.message || 'No se pudo preparar el PowerPoint.'}, {status:503});
   }

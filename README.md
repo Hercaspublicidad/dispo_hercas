@@ -89,7 +89,7 @@ La cuadrícula muestra 50 fichas por página de forma predeterminada y permite e
 
 ## Portada de las presentaciones
 
-La portada de las propuestas PowerPoint es siempre la imagen oficial `public/presentations/portada-hercas.png`, incrustada sin recomprimir ni recortar y sin textos superpuestos. Se genera como primera diapositiva 16:9; después siguen los separadores por ciudad y las fichas con datos actuales. Las fichas individuales siguen teniendo una sola diapositiva. El archivo de portada se incluye explícitamente en el despliegue del endpoint `/api/proposal`.
+Las propuestas PowerPoint comienzan siempre con la imagen oficial `public/presentations/portada-hercas.png` y terminan con `public/presentations/cierre-hercas.png`. Ambas se incrustan sin recomprimir ni recortar y sin textos superpuestos, a pantalla completa en formato 16:9. Entre ellas siguen los separadores por ciudad y las fichas con datos actuales. El total de diapositivas es 2 + ciudades + vallas. Las fichas individuales siguen teniendo una sola diapositiva. Las dos imágenes se incluyen explícitamente en el despliegue del endpoint `/api/proposal`.
 
 ## Carga de imágenes al cambiar de página
 

@@ -14,7 +14,7 @@ test('PowerPoint masivo incluye portada, separadores y precio editable', async (
   const output = await buildProposal(records, async () => photo, {includePrices:true});
   const zip = await JSZip.loadAsync(output);
   const slides = Object.keys(zip.files).filter(name => /^ppt\/slides\/slide\d+\.xml$/.test(name)).sort();
-  assert.equal(slides.length, 5);
+  assert.equal(slides.length, 6);
   const xml = (await Promise.all(slides.map(name => zip.file(name).async('string')))).join('\n');
   for (const text of ['BARRANQUILLA', 'BOGOTÁ', 'MV-BAQ-001']) assert.ok(xml.includes(text), text);
   const cover=await zip.file('ppt/slides/slide1.xml').async('string');
@@ -26,6 +26,15 @@ test('PowerPoint masivo incluye portada, separadores y precio editable', async (
     || relation.match(/Type="[^"]*\/image"[^>]*Target="\.\.\/media\/([^"]+)"/)?.[1];
   assert.ok(imageTarget,'la portada tiene una imagen incrustada');
   assert.deepEqual(await zip.file(`ppt/media/${imageTarget}`).async('nodebuffer'),await readFile(new URL('../public/presentations/portada-hercas.png',import.meta.url)),'se conserva exactamente la imagen entregada');
+  const closing=await zip.file('ppt/slides/slide6.xml').async('string');
+  assert.equal((closing.match(/<p:pic>/g)||[]).length,1);
+  assert.ok(!closing.includes('<a:t>'),'el cierre oficial no lleva textos superpuestos');
+  assert.ok(closing.includes('<a:off x="0" y="0"/>')&&closing.includes('<a:ext cx="12192000" cy="6858000"/>'));
+  const closingRelation=await zip.file('ppt/slides/_rels/slide6.xml.rels').async('string');
+  const closingTarget=closingRelation.match(/Target="\.\.\/media\/([^"]+)"[^>]*Type="[^"]*\/image"/)?.[1]
+    || closingRelation.match(/Type="[^"]*\/image"[^>]*Target="\.\.\/media\/([^"]+)"/)?.[1];
+  assert.ok(closingTarget);
+  assert.deepEqual(await zip.file(`ppt/media/${closingTarget}`).async('nodebuffer'),await readFile(new URL('../public/presentations/cierre-hercas.png',import.meta.url)),'el cierre conserva exactamente la imagen entregada');
   assert.ok(!xml.includes('SIMULACIÓN DE PAUTA HERCAS'));
   assert.ok(xml.includes('<a:t>9.700.000</a:t>'), 'el precio debe ser texto editable');
 });
