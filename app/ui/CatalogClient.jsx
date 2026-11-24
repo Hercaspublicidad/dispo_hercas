@@ -4,7 +4,7 @@ import PropertyFeatures, {PropertyHighlights} from './PropertyFeatures';
 import VallaThumbnail from './VallaThumbnail';
 import CatalogPagination from './CatalogPagination';
 import usePageThumbnails from './usePageThumbnails';
-import {paginateCatalog} from '../../lib/catalog-pagination.mjs';
+import {paginateCatalog,DEFAULT_CATALOG_PAGE_SIZE} from '../../lib/catalog-pagination.mjs';
 import {matchesCatalogSearch} from '../../lib/catalog-search.mjs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabaseBrowser } from '../../lib/supabase';
@@ -66,7 +66,7 @@ function MapPanel({ records, activeCity, onCity, onPick }) {
 export default function CatalogClient({ initial, canManage = false, isAdmin = false, initialThumbnailSources = [] }) {
   const [data, setData] = useState(initial), [query, setQuery] = useState(''), [city, setCity] = useState(''), [provider, setProvider] = useState(''), [availability, setAvailability] = useState(''), [support, setSupport] = useState(''), [setting, setSetting] = useState(''), [assetView, setAssetView] = useState('ready'), [view, setView] = useState('grid'), [tab, setTab] = useState('catalogo'), [selected, setSelected] = useState(null), [file, setFile] = useState(null), [uploading, setUploading] = useState(false), [result, setResult] = useState(null), [notice, setNotice] = useState(''), [basket, setBasket] = useState([]), [downloading, setDownloading] = useState(false), [fullSnapshot, setFullSnapshot] = useState(true);
   const [includePrices, setIncludePrices] = useState(false);
-  const [page,setPage]=useState(1),[pageSize,setPageSize]=useState(50);
+  const [page,setPage]=useState(1),[pageSize,setPageSize]=useState(DEFAULT_CATALOG_PAGE_SIZE);
   const resultHead=useRef(null);
   const changeFilter=(setter,value)=>{setter(value);setPage(1);};
   const changeCity=useCallback(value=>{setCity(value);setPage(1);},[]);
