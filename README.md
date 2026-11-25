@@ -28,7 +28,7 @@ Aplicar `supabase/migrations/20261029160000_aliados_admin_crud.sql` antes de usa
 
 El formulario acepta JPG, PNG y WebP de hasta 4 MB y 40 megapíxeles. El servidor verifica la imagen, corrige orientación, limita dimensiones a 2400 × 1800 y guarda WebP con calidad 85 en el bucket privado. Los PNG existentes se conservan hasta reemplazarlos. Se conserva la procedencia del registro y sus archivos anteriores. Eliminar significa archivar; el código permanece reservado y se puede restaurar desde el panel.
 
-Tras editar una valla, su ficha individual se genera con los datos y la foto actuales, utilizando el mismo diseño que la propuesta masiva. Los PowerPoint descargados anteriormente conservan su contenido. La disponibilidad continúa gestionándose con los archivos semanales. La importación masiva de metadatos o ZIP de fotos todavía no está incluida.
+Tras editar una valla, su ficha individual se genera con los datos y la foto actuales, utilizando el mismo diseño que la propuesta masiva. Los PowerPoint descargados anteriormente conservan su contenido. La disponibilidad continúa gestionándose con los archivos semanales. La importación masiva acepta CSV de datos o ZIP de datos e imágenes. Tras revisar el archivo, «Seleccionar todas las válidas» marca juntas las nuevas vallas y las actualizaciones pendientes, excluyendo filas con errores o ya importadas. Se conserva la selección individual, la opción de seleccionar solo nuevas y la de desmarcar todas. Los datos se guardan al pulsar Aplicar; los procesos interrumpidos pueden reanudarse.
 
 Pruebas: `node --test --test-isolation=none tests/*.test.mjs`. Las comprobaciones de base de datos están en `tests/valla-admin-transaction.sql`; se ejecutan en una transacción que termina con `rollback`.
 

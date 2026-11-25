@@ -1,10 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
-import {encodeTransferCsv,decodeTransferCsv,reviewTransferRows,validateTransferInput,makeExportGroups,safeTransferPath,TRANSFER_COLUMNS} from '../lib/valla-transfer.mjs';
+import {encodeTransferCsv,decodeTransferCsv,reviewTransferRows,selectTransferRows,validateTransferInput,makeExportGroups,safeTransferPath,TRANSFER_COLUMNS} from '../lib/valla-transfer.mjs';
 import {buildTransferArchive,readTransferArchive,readZipEntry} from '../lib/valla-transfer-zip.mjs';
 
 const row={codigo:'TEST-CAL-001',proveedor:'Aliado',ciudad:'Cali',ubicacion:'Carrera 7; esquina "azul"\nPiso 2',estado:'completo',tarifa_mensual_cop:2500000,latitud:-3.4,longitud:-76.5,datos_fuente:{codigo_proveedor:'EXT-201',archivo_fuente_nombre:'original.pptx',entorno:'exterior',tipo_soporte:'estatica'},actualizado_en:'2026-10-29T15:00:00Z'};
+
+test('seleccionar todas marca nuevas y actualizaciones válidas y pendientes, pero excluye errores e importadas',()=>{
+  const rows=[{codigo:'A',mode:'update',selected:false,changes:[{campo:'ciudad'}]},{codigo:'B',mode:'create',selected:true},{codigo:'C',mode:'update',error:'Datos inválidos',selected:false},{codigo:'D',mode:'update',status:'done',selected:false},{codigo:'E',mode:'update',status:'partial',result:'Imágenes pendientes',selected:false}];
+  assert.deepEqual(selectTransferRows(rows).filter(r=>r.selected).map(r=>r.codigo),['A','B','E']);
+  assert.deepEqual(selectTransferRows(rows,'create').filter(r=>r.selected).map(r=>r.codigo),['B']);
+  assert.ok(selectTransferRows(rows,'none').every(r=>!r.selected));
+  assert.equal(rows[0].selected,false,'la revisión original no se modifica');
+  assert.equal(selectTransferRows(rows)[4].result,'Imágenes pendientes','conserva el estado para reanudar');
+});
 
 test('CSV conserva sentido y estructura al exportar e importar, y admite archivos anteriores',()=>{
   const previous={...row,datos_fuente:{...row.datos_fuente,sentido:'Sur a norte',estructura:'Metalica; "doble"'}};
