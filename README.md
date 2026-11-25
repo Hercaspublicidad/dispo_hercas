@@ -85,6 +85,8 @@ Los objetos PNG/JPG originales se conservan en Storage como respaldo, fuera de l
 
 ## Paginación del catálogo
 
+El filtro Destacados permite seleccionar varias etiquetas registradas en el catálogo, buscarlas por texto y quitar selecciones individualmente o limpiar el grupo. La coincidencia predeterminada exige todos los destacados elegidos; también permite cualquiera. Ignora diferencias de tildes, mayúsculas y espacios repetidos al comparar etiquetas completas. Se combina con los demás filtros antes de paginar y se aplica tanto a tarjetas como al mapa. Cambiar etiquetas o modo vuelve a la primera página sin borrar la selección de vallas.
+
 Cada tarjeta muestra características (tamaño, iluminación, estrato, sentido y estructura), destacados y un estado público: DISPONIBLE, OCUPADA o POR CONFIRMAR. Los estados y el filtro comparten la misma regla de vigencia de ocho días; las fuentes en revisión, duplicadas o sin confirmación vigente se muestran por confirmar. «No disponible», ocupada, reservada y vendida vigentes se presentan como OCUPADA. Los estados internos de revisión conservan su función administrativa.
 
 Los destacados se editan desde administración como etiquetas: Enter o Agregar incorpora el texto y la × permite quitar cada etiqueta (hasta diez de cien caracteres). Al guardar también se conserva el texto pendiente aunque no se haya pulsado Enter. El campo admite pegar varias líneas como etiquetas. No se completan automáticamente las cercanías. Se guardan en `datos_fuente.destacados`, se muestran también en la hoja de vida y viajan en la columna `destacados` del CSV y en los ZIP. Las importaciones antiguas sin esa columna conservan los valores actuales; una celda vacía los borra. Las actualizaciones masivas siguen requiriendo revisión.
