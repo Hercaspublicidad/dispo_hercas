@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {propertyBadge} from '../lib/availability.mjs';
-import {highlightItems,validateHighlights} from '../lib/valla-highlights.mjs';
+import {highlightItems,validateHighlights,mergeHighlightDraft} from '../lib/valla-highlights.mjs';
 import {validateValla} from '../lib/valla-admin.mjs';
 import {mapRemoteCatalog} from '../lib/catalog-supabase.mjs';
 import {transferInput,encodeTransferCsv,decodeTransferCsv,validateTransferInput,reviewTransferRows} from '../lib/valla-transfer.mjs';
@@ -9,6 +9,15 @@ import {buildTransferArchive,readTransferArchive} from '../lib/valla-transfer-zi
 
 const base={codigo:'TEST-CAL-001',proveedor:'Aliado',ciudad:'Cali',ubicacion:'Calle 1',estado:'completo'};
 const highlights=['Cerca de universidades','Cerca de centros comerciales','Zona de restaurantes'];
+
+test('el editor de etiquetas conserva el texto pendiente al guardar y evita duplicados',()=>{
+  assert.deepEqual(mergeHighlightDraft(highlights.slice(0,2),' Zona de restaurantes '),highlights);
+  assert.deepEqual(mergeHighlightDraft(highlights,'CERCA DE UNIVERSIDADES'),highlights);
+  assert.deepEqual(mergeHighlightDraft(highlights,''),highlights);
+  assert.deepEqual(mergeHighlightDraft([],highlights.join('\n')),highlights);
+  assert.throws(()=>mergeHighlightDraft(Array.from({length:10},(_,i)=>`Lugar ${i}`),'Otro lugar'),/hasta 10/);
+  assert.throws(()=>mergeHighlightDraft([],'x'.repeat(101)),/100 caracteres/);
+});
 
 test('los tres estados públicos respetan vigencia, confirmación y revisión de la fuente',()=>{
   const now=new Date('2026-11-23T12:00:00Z');

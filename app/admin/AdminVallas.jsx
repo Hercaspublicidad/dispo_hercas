@@ -1,6 +1,7 @@
 'use client';
 import BrandLogo from '../ui/BrandLogo';
-import {highlightItems} from '../../lib/valla-highlights.mjs';
+import {highlightItems,mergeHighlightDraft} from '../../lib/valla-highlights.mjs';
+import HighlightsInput from './HighlightsInput';
 import VallaThumbnail from '../ui/VallaThumbnail';
 import usePageThumbnails from '../ui/usePageThumbnails';
 import AdminTransfer from './AdminTransfer';
@@ -39,6 +40,7 @@ export default function AdminVallas() {
   const [rows,setRows] = useState([]),[loading,setLoading] = useState(true),[error,setError] = useState(''),[notice,setNotice] = useState('');
   const [query,setQuery] = useState(''),[scope,setScope] = useState('activas'),[page,setPage] = useState(1);
   const [editing,setEditing] = useState(null),[form,setForm] = useState(blank),[photo,setPhoto] = useState(null),[preview,setPreview] = useState('');
+  const [highlightDraft,setHighlightDraft]=useState('');
   const [saving,setSaving] = useState(false),[dirty,setDirty] = useState(false),[confirmArchive,setConfirmArchive] = useState(null),[confirmDiscard,setConfirmDiscard] = useState(false);
   const fileInput = useRef(null), editorRef = useRef(null), opener = useRef(null);
   const refresh = async () => {
@@ -74,7 +76,7 @@ export default function AdminVallas() {
   const selected = rows.find(row=>row.codigo===editing);
   const open = row => {
     opener.current = document.activeElement;
-    setEditing(row?.codigo || '');setForm(row ? toForm(row) : {...blank});setPhoto(null);setError('');setDirty(false);
+    setEditing(row?.codigo || '');setForm(row ? toForm(row) : {...blank});setHighlightDraft('');setPhoto(null);setError('');setDirty(false);
   };
   const close = () => {if(saving)return;if(dirty){setConfirmDiscard(true);return;}setEditing(null);setPhoto(null);};
   const change = (key,value) => {setForm(old=>({...old,[key]:value}));setDirty(true);};
@@ -89,7 +91,8 @@ export default function AdminVallas() {
   const save = async event => {
     event.preventDefault();setSaving(true);setError('');setNotice('');
     try {
-      const body = new FormData();body.append('datos',JSON.stringify(form));if(photo)body.append('foto',photo);
+      const payload={...form,destacados:mergeHighlightDraft(form.destacados,highlightDraft)};
+      const body = new FormData();body.append('datos',JSON.stringify(payload));if(photo)body.append('foto',photo);
       await responseJson(await fetch(editing ? '/api/admin/vallas/'+encodeURIComponent(editing) : '/api/admin/vallas',{method:editing?'PATCH':'POST',body}));
       setDirty(false);setEditing(null);setPhoto(null);setNotice('Valla guardada. Las nuevas presentaciones y fichas usarán estos datos y su foto actual.');
       try {await refresh();} catch {setError('La valla se guardó, pero la lista no se pudo actualizar. Pulsa Recargar.');}
@@ -135,7 +138,7 @@ export default function AdminVallas() {
         <label className="admin-photo-label">{image?'Cambiar foto':'Seleccionar foto'}<input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={choosePhoto}/></label><p className="admin-hint">JPG, PNG o WebP · hasta 4 MB. La foto se guardará en WebP.</p>{photo&&<button type="button" className="secondary" onClick={()=>{setPhoto(null);if(fileInput.current)fileInput.current.value='';}}>Quitar foto seleccionada</button>}
         <div className="admin-help"><strong>Así se actualizan las presentaciones</strong><p>Al guardar, las nuevas propuestas y la ficha individual usarán la información y la foto actual. Los archivos descargados anteriormente conservan su contenido.</p>{selected?.foto&&<a className="secondary" target="_blank" rel="noreferrer" href={`/api/asset/${selected.codigo}/ficha`}>Descargar ficha actual sin precio</a>}</div>
       </div><div><h3>Datos comerciales</h3><div className="admin-fields">{fields.map(([key,label,type,required,maxLength])=><label key={key} className={key==='ubicacion'?'admin-wide':''}>{label}{required?' *':''}<input name={key} type={type} required={required} maxLength={maxLength} value={form[key]} readOnly={key==='codigo'&&!!editing} onChange={e=>change(key,e.target.value)} step={type==='number'?'any':undefined} min={['estrato','flujo_personas_vehiculos','tarifa_mensual_cop'].includes(key)?0:key==='latitud'?-90:key==='longitud'?-180:undefined} max={key==='tarifa_mensual_cop'?1e12:key==='latitud'?90:key==='longitud'?180:undefined} placeholder={key==='codigo'?'MV-BAQ-001':undefined}/></label>)}
-        <label className="admin-wide">Destacados de la valla<textarea name="destacados" rows={4} maxLength={2000} value={form.destacados} placeholder={'Cerca de universidades\nCerca de centros comerciales\nZona de restaurantes'} aria-describedby="destacados-help" onChange={e=>change('destacados',e.target.value)}/><span id="destacados-help">Un destacado por línea. Hasta 10, de 100 caracteres cada uno. Registra solo cercanías confirmadas.</span></label>
+        <HighlightsInput key={editing} value={form.destacados} draft={highlightDraft} onChange={value=>change('destacados',value)} onDraftChange={value=>{setHighlightDraft(value);setDirty(true);}}/>
         <label>Estado de revisión<select value={form.estado} onChange={e=>change('estado',e.target.value)}><option value="revision_fuente">Revisar fuente</option><option value="completo">Completo</option><option value="duplicado_confirmado">Duplicado confirmado</option></select></label>
         <label>Entorno<select value={form.entorno} onChange={e=>change('entorno',e.target.value)}><option value="">Por confirmar</option><option value="exterior">Vía pública</option><option value="aeropuerto">Aeropuerto</option><option value="centro_comercial">Centro comercial</option></select></label>
         <label>Tipo de soporte<select value={form.tipo_soporte} onChange={e=>change('tipo_soporte',e.target.value)}><option value="">Por confirmar</option><option value="estatica">Valla estática</option><option value="led">Pantalla LED</option></select></label>
