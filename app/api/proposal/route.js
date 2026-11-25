@@ -5,6 +5,7 @@ import { hasCatalogPermission } from '../../../lib/catalog-permission.mjs';
 import { catalogFromSupabase } from '../../../lib/catalog-supabase.mjs';
 import { buildProposal } from '../../../lib/proposal-cloud.mjs';
 import { uploadProposal } from '../../../lib/upload-proposal.mjs';
+import {PROPOSAL_SELECTION_LIMIT} from '../../../lib/proposal-selection.mjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -14,8 +15,8 @@ export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   if (body.includePrices !== undefined && typeof body.includePrices !== 'boolean') return Response.json({error:'La opción de precios debe ser verdadera o falsa.'}, {status:400});
   const codes = body.codes;
-  if (!Array.isArray(codes) || codes.length < 1 || codes.length > 550 || codes.some(x => typeof x !== 'string' || !/^[A-Z0-9]+(?:-[A-Z0-9]+)+$/.test(x)) || new Set(codes).size !== codes.length) {
-    return Response.json({error:'Selecciona entre 1 y 550 códigos válidos, sin repetir.'}, {status:400});
+  if (!Array.isArray(codes) || codes.length < 1 || codes.length > PROPOSAL_SELECTION_LIMIT || codes.some(x => typeof x !== 'string' || !/^[A-Z0-9]+(?:-[A-Z0-9]+)+$/.test(x)) || new Set(codes).size !== codes.length) {
+    return Response.json({error:`Selecciona entre 1 y ${PROPOSAL_SELECTION_LIMIT} códigos válidos, sin repetir.`}, {status:400});
   }
   const client = await supabaseServer();
   const { data: identity, error: authError } = await client.auth.getUser();
