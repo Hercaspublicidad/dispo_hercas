@@ -99,7 +99,7 @@ Las propuestas PowerPoint comienzan siempre con la imagen oficial `public/presen
 
 ## Diseño de las fichas
 
-Las fichas de valla siguen la referencia comercial: cabecera con código y ciudad, fotografía grande a la izquierda fundida con el fondo azul, flujo e información de la valla a la derecha y franja inferior con estrato, iluminación, tamaño y logo oficial. Sentido y estructura aparecen cuando están completos. El precio y las condiciones comerciales siguen ocultos por defecto y solo se incluyen al marcar la opción de precios. Se usa la ciudad como zona; el flujo conserva su etiqueta genérica porque todavía no se registra su unidad ni periodo. Las fotos se descargan sin el recorte panorámico previo y se ajustan por separado a ficha y separador.
+Las fichas de valla siguen la referencia comercial: cabecera con código y ciudad, fotografía grande a la izquierda fundida con el fondo azul, flujo e información de la valla a la derecha y franja inferior con estrato, iluminación, tamaño y logo oficial. Sentido y estructura aparecen cuando están completos. El precio y las condiciones comerciales siguen ocultos por defecto y solo se incluyen al marcar la opción de precios. Se usa la ciudad como zona y la etiqueta del flujo en la presentación es «vehículos aprox. / día». El bloque comercial muestra «Arrendamiento / mes», «Desde $…» y «+ IVA / mes» cuando se incluyen precios; de lo contrario se sustituye por una línea amarilla. Las condiciones comerciales adicionales solo aparecen con precios activados, encima de la franja inferior. Las fotos se descargan sin el recorte panorámico previo y se ajustan por separado a ficha y separador.
 
 ## Separadores por ciudad
 

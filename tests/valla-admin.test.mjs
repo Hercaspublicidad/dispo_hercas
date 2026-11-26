@@ -48,7 +48,7 @@ test('los nuevos datos aparecen en las fichas y propuestas incluso sin precio',a
     const media=await Promise.all(Object.keys(zip.files).filter(name=>/^ppt\/media\/.*\.png$/.test(name)).map(name=>zip.file(name).async('nodebuffer')));
     assert.ok(media.some(image=>image.equals(logo)),'la ficha incluye el logo oficial incrustado');
     const xml=(await Promise.all(Object.keys(zip.files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name)).map(name=>zip.file(name).async('string')))).join('');
-    for(const text of ['Estrato','3','Iluminación','LED nocturna','Flujo personas / vehículos','12.500','Sentido: Norte a sur','Estructura: Tubular metálica'])assert.ok(xml.includes(text),text);
+    for(const text of ['Estrato','3','Iluminación','LED nocturna','vehículos aprox. / día','12.500','Sentido: Norte a sur','Estructura: Tubular metálica'])assert.ok(xml.includes(text),text);
     assert.ok(!xml.includes('9.999.999'));
   }
 });

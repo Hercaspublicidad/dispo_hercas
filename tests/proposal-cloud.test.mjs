@@ -43,7 +43,8 @@ test('PowerPoint masivo incluye portada, separadores y precio editable', async (
   assert.equal((zone.match(/<p:pic>/g)||[]).length,2,'foto y velo azul con símbolo, compatibles sin SVG');
   assert.ok(!xml.includes('SIMULACIÓN DE PAUTA HERCAS'));
   assert.ok(!xml.includes('Sentido:')&&!xml.includes('Estructura:'),'los campos vacíos no generan etiquetas sin datos');
-  assert.ok(!xml.includes('aprox. / día')&&!xml.includes('Desde'),'no inventa unidades de flujo ni precios mínimos');
+  assert.ok(xml.includes('vehículos aprox. / día')&&xml.includes('Desde $'),'usa los textos comerciales solicitados');
+  assert.ok(!xml.includes('Arrendamiento / mes · COP'));
   assert.ok(xml.includes('<a:t>9.700.000</a:t>'), 'el precio debe ser texto editable');
 });
 
@@ -58,6 +59,10 @@ test('fichas y propuestas omiten precios y condiciones comerciales salvo selecci
       const xml = (await Promise.all(slides.map(name=>zip.file(name).async('string')))).join('');
       assert.equal(xml.includes('9.876.543'), includePrices === true);
       assert.equal(xml.includes('Arrendamiento / mes'), includePrices === true);
+      assert.equal(xml.includes('Desde $'), includePrices === true);
+      assert.equal(xml.includes('+ IVA / mes'), includePrices === true);
+      assert.equal(xml.includes('<a:ln w="38100">'), includePrices !== true,'sin precio se dibuja una línea amarilla en lugar del bloque comercial');
+      assert.ok(!xml.includes('Confirmar disponibilidad y condiciones.'));
       assert.equal(xml.includes('Costo adicional 12345 COP'), includePrices === true);
       assert.ok(xml.includes('TEST-CAL-001'));
     }
