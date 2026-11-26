@@ -99,6 +99,8 @@ Las propuestas PowerPoint comienzan siempre con la imagen oficial `public/presen
 
 ## Diseño de las fichas
 
+La composición revisada de una foto se conserva por valla en `datos_fuente.foto_presentacion_lado` (`izquierda` por defecto o `derecha`). El generador aplica ese lado automáticamente a ficha individual y propuesta: mueve el cuerpo de datos al lado contrario e invierte únicamente el degradado, sin reflejar la fotografía. Cabecera y franja inferior permanecen iguales. No hay un selector adicional en la interfaz. Para guardar una composición revisada, `node --env-file=.env.local scripts/set_fiche_photo_side.mjs --code CODIGO --side derecha` muestra la referencia de la foto vigente; con `--apply --photo-sha SHA_REVISADO` guarda el cambio con respaldo local y control de concurrencia.
+
 Las fichas de valla siguen la referencia comercial: cabecera con código y ciudad, fotografía grande a la izquierda fundida con el fondo azul, flujo e información de la valla a la derecha y franja inferior con estrato, iluminación, tamaño y logo oficial. Sentido y estructura aparecen cuando están completos. El precio y las condiciones comerciales siguen ocultos por defecto y solo se incluyen al marcar la opción de precios. Se usa la ciudad como zona y la etiqueta del flujo en la presentación es «vehículos aprox. / día». El bloque comercial muestra «Arrendamiento / mes», «Desde $…» y «+ IVA / mes» cuando se incluyen precios; de lo contrario se sustituye por una línea amarilla. Las condiciones comerciales adicionales solo aparecen con precios activados, encima de la franja inferior. Las fotos se descargan sin el recorte panorámico previo y se ajustan por separado a ficha y separador.
 
 ## Separadores por ciudad

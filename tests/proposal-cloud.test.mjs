@@ -4,6 +4,8 @@ import sharp from 'sharp';
 import JSZip from 'jszip';
 import {readFile} from 'node:fs/promises';
 import { buildProposal, buildIndividualFiche } from '../lib/proposal-cloud.mjs';
+import {mapRemoteCatalog} from '../lib/catalog-supabase.mjs';
+import {validateTransferInput} from '../lib/valla-transfer.mjs';
 
 test('PowerPoint masivo incluye portada, separadores y precio editable', async () => {
   const photo = await sharp({create:{width:160,height:90,channels:3,background:'#abcde0'}}).png().toBuffer();
@@ -66,5 +68,25 @@ test('fichas y propuestas omiten precios y condiciones comerciales salvo selecci
       assert.equal(xml.includes('Costo adicional 12345 COP'), includePrices === true);
       assert.ok(xml.includes('TEST-CAL-001'));
     }
+  }
+});
+
+test('el lado guardado coloca foto y datos en lados opuestos sin voltear la foto ni cambiar la franja inferior',async()=>{
+  const photo=await sharp({create:{width:320,height:240,channels:3,background:'#468baa'}}).jpeg().toBuffer();
+  const base={codigo:'TEST-BOG-001',ciudad:'Bogotá',proveedor:'Aliado',ubicacion:'Calle 1',estado:'completo',datos_fuente:{foto_presentacion_lado:'derecha'}};
+  const saved=validateTransferInput({codigo:base.codigo},base);
+  const mapped=mapRemoteCatalog([saved],[{codigo:base.codigo,tipo:'foto'}],[],[]).records[0];
+  assert.equal(mapped.fotoPresentacionLado,'derecha');
+  const left={...mapped,fotoPresentacionLado:'izquierda'};
+  for(const [record,right] of [[left,false],[mapped,true]]) {
+    const zip=await JSZip.loadAsync(await buildIndividualFiche(record,photo));
+    const xml=await zip.file('ppt/slides/slide1.xml').async('string');
+    const pictures=[...xml.matchAll(/<p:pic>[\s\S]*?<\/p:pic>/g)].map(match=>match[0]);
+    assert.ok(pictures[1].includes(`<a:off x="${Math.round((right?5.777777:0)*914400)}"`));
+    assert.ok(!pictures[1].includes('flipH='),'la señalización y el sentido vial de la foto se conservan');
+    assert.equal(pictures[2].includes('flipH="1"'),right,'solo se invierte el degradado');
+    const flow=[...xml.matchAll(/<p:sp>[\s\S]*?<\/p:sp>/g)].map(match=>match[0]).find(shape=>shape.includes('vehículos aprox. / día'));
+    assert.ok(flow.includes(`<a:off x="${Math.round((right ? .62 : 7.82)*914400)}"`));
+    assert.ok(xml.includes('<a:ln w="38100">'),'se conserva la línea amarilla sin precios');
   }
 });
